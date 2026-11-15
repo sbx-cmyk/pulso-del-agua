@@ -966,34 +966,35 @@ function modeloVivo(P, oni) {
   return {proximo: out, meses: ent.length, hasta: `${u.y}-${String(u.m).padStart(2, "0")}`, oni: oUlt, oni_mes: oni.oni[oni.oni.length - 1].slice(0, 2), error: r1(Math.sqrt(s2))};
 }
 function textosVivo(S, Z) {
-  const en = ln() === "en", f1 = x => fmt(x, 1), N = S.yrs.length, out = [];
+  const en = ln() === "en", N = S.yrs.length, out = [];
   const fecha = new Date(S.y0, S.m - 1, S.d).toLocaleDateString(en ? "en-US" : "es-PE", {day: "numeric", month: "long"});
   const lista = a => { const s = a.slice(-3).map(o => o.y); return s.length > 1 ? s.slice(0, -1).join(", ") + (en ? " and " : " y ") + s.at(-1) : String(s[0]); };
-  // 1) Máxima del día
+  // 1) Día: más caluroso o más fresco de lo normal (en palabras)
   const dMx = S.mx - S.nMx, cal = dMx >= 0;
   const igual = S.yrs.filter(o => cal ? o.mx >= S.mx : o.mx <= S.mx);
-  let t = en ? `On ${fecha} the high in your area was ${f1(S.mx)} °C, ${f1(Math.abs(dMx))} °C ${cal ? "above" : "below"} normal for that date.`
-             : `El ${fecha} la máxima en su zona fue ${f1(S.mx)} °C, ${f1(Math.abs(dMx))} °C ${cal ? "más" : "menos"} que lo normal para esa fecha.`;
+  let t = Math.abs(dMx) < .5 ? (en ? `On ${fecha} the day in your area was as hot as usual.` : `El ${fecha} el día en su zona fue tan caluroso como siempre.`)
+        : (en ? `On ${fecha} the day in your area was ${cuantoCalor(dMx)} than normal.` : `El ${fecha} el día en su zona fue ${cuantoCalor(dMx)} que lo normal.`);
   const pal = en ? (cal ? "hot" : "cool") : (cal ? "caluroso" : "fresco");
-  t += !igual.length ? (en ? ` It was the ${pal}est ${fecha} since 1981.` : ` Fue el ${fecha} más ${pal} desde 1981.`)
+  if (Math.abs(dMx) >= .5) t += !igual.length ? (en ? ` It was the ${pal}est ${fecha} since 1981.` : ` Fue el ${fecha} más ${pal} desde 1981.`)
      : igual.length <= 3 ? (en ? ` A ${fecha} this ${pal} only happened in ${lista(igual)}.` : ` Un ${fecha} así de ${pal} solo hubo en ${lista(igual)}.`)
-     : (en ? ` Days like this on that date happened in ${igual.length} of ${N} years; the last one in ${igual.at(-1).y}.` : ` Días así en esa fecha hubo en ${igual.length} de ${N} años; el último, en ${igual.at(-1).y}.`);
+     : " " + cadaCuanto(igual.length, N);
   out.push({t, raro: igual.length / N});
   // 2) Noche: más fría o más cálida de lo normal
-  { const fria = S.mn <= S.nMn, igualN = S.yrs.filter(o => fria ? o.mn <= S.mn : o.mn >= S.mn);
+  { const dN = S.mn - S.nMn, fria = dN <= 0, igualN = S.yrs.filter(o => fria ? o.mn <= S.mn : o.mn >= S.mn);
     const adj = en ? (fria ? "cold" : "warm") : (fria ? "fría" : "cálida");
-    let tn = en ? `On the night of ${fecha} the low was ${f1(S.mn)}\u00a0°C (normal: ${f1(S.nMn)}\u00a0°C).` : `La noche del ${fecha} la mínima fue ${f1(S.mn)}\u00a0°C (lo normal: ${f1(S.nMn)}\u00a0°C).`;
-    tn += !igualN.length ? (en ? ` The ${adj}est night for that date since 1981.` : ` Fue la noche más ${adj} para esa fecha desde 1981.`)
+    let tn = Math.abs(dN) < .5 ? (en ? `The night of ${fecha} was normal.` : `La noche del ${fecha} fue normal.`)
+           : (en ? `The night of ${fecha} was ${cuantoCalor(dN).replace("hotter", "warmer")} than normal.` : `La noche del ${fecha} fue ${cuantoCalor(dN).replace("más caliente", "más cálida").replace("más frío", "más fría")} que lo normal.`);
+    if (Math.abs(dN) >= .5) tn += !igualN.length ? (en ? ` The ${adj}est night for that date since 1981.` : ` Fue la noche más ${adj} para esa fecha desde 1981.`)
         : igualN.length <= 3 ? (en ? ` A night this ${adj} on that date only happened in ${lista(igualN)}.` : ` Una noche tan ${adj} en esa fecha solo hubo en ${lista(igualN)}.`)
-        : (en ? ` Nights like this on that date: ${igualN.length} of ${N} years.` : ` Noches así en esa fecha hubo en ${igualN.length} de ${N} años.`);
+        : " " + cadaCuanto(igualN.length, N);
     out.push({t: tn, raro: igualN.length / N}); }
   // 3) Lluvia de la última semana
   if (S.r !== null && (S.r >= 1 || S.nR >= 2)) {
     const conR = S.yrs.filter(o => o.r !== null), mas = conR.filter(o => o.r >= S.r);
-    let tr = en ? `In the week up to ${fecha} it rained ${fmt(S.r, 0)} mm (normal: ${fmt(S.nR, 0)} mm).` : `En la semana hasta el ${fecha} llovió ${fmt(S.r, 0)} mm (lo normal: ${fmt(S.nR, 0)} mm).`;
+    let tr = en ? `In the week up to ${fecha} it rained ${veces(S.r, S.nR)}.` : `En la semana hasta el ${fecha} llovió ${veces(S.r, S.nR)}.`;
     if (S.r >= 1) tr += !mas.length ? (en ? ` No week this rainy on those dates since 1981.` : ` Ninguna semana tan lluviosa en esas fechas desde 1981.`)
         : mas.length <= 3 ? (en ? ` A week this rainy on those dates only happened in ${lista(mas)}.` : ` Una semana tan lluviosa en esas fechas solo hubo en ${lista(mas)}.`)
-        : (en ? ` Weeks like this: ${mas.length} of ${conR.length} years.` : ` Semanas así hubo en ${mas.length} de ${conR.length} años.`);
+        : " " + cadaCuanto(mas.length, conR.length);
     out.push({t: tr, raro: S.r >= 1 ? mas.length / Math.max(conR.length, 1) : .5});
   }
   return out.sort((a, b) => a.raro - b.raro).map(o => ({t: o.t, vivo: true, fecha}));
@@ -1067,7 +1068,7 @@ const QA = {
   bL: {normal: "¡Sapa kutin hina qarpay!", mucha: "¡Yarqhaykita qhawariy!", poca: "¡Yakuta waqaychay!", gris: "Mana sut'ichu"},
   bT: {mucho: "¡Qarakita intimanta amachay!", mas: "¡Tutamanta qarpay!", normal: "Llapan allin", frio: "¡P'achallikuy!"},
   bV: {seco: "¡Yakuta waqaychay!", incierto: "¡Wakichikuy!"}, bD: {mas: "Ñawpaqmanta aswan ruphay", igual: "Ñawpaq hinallataq"},
-  antes: "¿Ñawpaqmanta aswan q'uñichu?", masCalor80: "Arí: kunanqa 40 wata ñawpaqmanta aswan q'uñi", igual80: "Manam: 40 wata ñawpaq hinallataq", notaCalor: x => `Llapan watapa wayra q'uñin, 1980 watakunawan tupachisqa: ${x} °C.`, aqui: "Kaypi kachkanki",
+  antes: "¿Ñawpaqmanta aswan q'uñichu?", masCalor80: x => "Arí: kunanqa 40 wata ñawpaqmanta aswan q'uñi", igual80: "Manam: 40 wata ñawpaq hinallataq", notaCalor: x => `Llapan watapa wayra q'uñin, 1980 watakunawan tupachisqa: ${x} °C.`, aqui: "Kaypi kachkanki",
   proxMes: "Hamuq killa", hara: "Yaqa kayhina kanqa", lonormal: "Sapa kutin", porNino: "El Niño rayku",
   hacer: "Kay p'unchawkunapi ima ruwana", cuando: "¿Hayk'aqtaq llaqtaykipi paran?",
   prep: "Qhichwa simipi (Collao) — <b>borrador</b>: hablantes de Moquegua revisachkanku. Rimaynin, unay qillqakunapas, kunanqa castellanopi."},
@@ -1081,7 +1082,7 @@ const QA = {
   bL: {normal: "¡Sapa kuti qarpam!", mucha: "¡Larq'ama uñakipam!", poca: "¡Uma imt'am!", gris: "Janiw qhanakiti"},
   bT: {mucho: "¡Inti lupit jark'aqasim!", mas: "¡Alwata qarpam!", normal: "Taqikuna walikiwa", frio: "¡Thayat jark'aqasim!"},
   bV: {seco: "¡Uma imt'am!", incierto: "¡Wakicht'asim!"}, bD: {mas: "Nayrat sipans juk'amp junt'u", igual: "Nayra pachjamaki"},
-  antes: "¿Nayrat sipans juk'amp junt'uti?", masCalor80: "Jisa: jichhax 40 mara nayrat sipans juk'amp junt'u", igual80: "Janiw: 40 mara nayrjamakiwa", notaCalor: x => `Taqi marana thaya junt'upa, 1980 maranakamp chikachata: ${x} °C.`, aqui: "Akankasktawa",
+  antes: "¿Nayrat sipans juk'amp junt'uti?", masCalor80: x => "Jisa: jichhax 40 mara nayrat sipans juk'amp junt'u", igual80: "Janiw: 40 mara nayrjamakiwa", notaCalor: x => `Taqi marana thaya junt'upa, 1980 maranakamp chikachata: ${x} °C.`, aqui: "Akankasktawa",
   proxMes: "Jutir phaxsi", hara: "Niya akhamäniwa", lonormal: "Sapa kuti", porNino: "El Niño layku",
   hacer: "Aka urunakan kuns luraña", cuando: "¿Kunapachas markaman jallu purí?",
   prep: "Aymar arun — <b>borrador</b>: Moquegua aymar arsurinakampiw uñakipaski. Arupax, jach'a qillqanakas, jichhakamax kastill arunkiwa."}
@@ -1113,12 +1114,13 @@ function elegirIdioma(l) { lang = l; try { localStorage.setItem("idioma", l); lo
 // ---------- Traducción COMPLETA a quechua (Collao) y aimara — BORRADOR para revisión con hablantes de Moquegua ----------
 // Funciona oración por oración: lo que se ve en pantalla y lo que dice el agricultor. Lo que no está aquí queda en castellano.
 const TR = {
+ "Su zona se está calentando poco a poco, y no es casualidad: lo comprobamos con datos de la NASA y una prueba estadística.": ["Llaqtaykiqa pisimanta pisi q'uñikuchkan, manataq yanqachu: NASA willakuykunawan, huk estadística yachaywan ima qhawarqayku.", "Markamax juk'at juk'at junt'ukaskiwa, janiw inakikiti: NASA yatiyawinakampi, mä estadística yatiñampi uñakipt'ayapxta."],
  "Más calor de lo normal": ["Sapa kutinmanta aswan q'uñi", "Sapa kutit sipans juk'amp junt'u"], "Más frío de lo normal": ["Sapa kutinmanta aswan chiri", "Sapa kutit sipans juk'amp thaya"], "Como siempre": ["Sapa kutin hina", "Sapa kutjama"],
  "Nuestro reto de la NASA": ["NASA nisqapa atipanakuyniyku", "NASA ukan atipt'äwisa"],
  "Hoy": ["Kunan", "Jichhüru"], "Próximo mes": ["Hamuq killa", "Jutir phaxsi"], "Ahora": ["Kunan", "Jichhaxa"],
  "Yachachiq le ayuda a planificar su chacra con 45 años de datos de la NASA.": ["Yachachiqqa chakraykita wakichinaykipaq yanapasunki, NASA nisqapa 45 wata willakuyninkunawan.", "Yachachiqax yapuma wakichañatakiw yanapt'ätam, NASA ukan 45 mara yatiyawinakapampi."],
  "Lo que pasó en los últimos 30 días": ["Qhipa 30 p'unchawkunapi imakunachus karqan", "Qhipa 30 urunakan kunas utjawayi"],
- "Paso 3: ¿qué hago con mis cultivos?": ["3 ruway: ¿tarpusqaykunawan imatataq ruwasaq?", "3 lurawi: ¿satanakajampi kuns lurä?"],
+ "¿Qué hago con mis cultivos?": ["¿Tarpusqaykunawan imatataq ruwasaq?", "¿Satanakajampi kuns lurä?"],
  "Esto es lo que viene el próximo mes. No es el clima de hoy.": ["Kayqa hamuq killapi hamuqmi. Manam kunan p'unchawpa pachanchu.", "Akax jutir phaxsin jutkani ukawa. Janiw jichhürun pachapakiti."],
  "Consejos para sus cultivos": ["Tarpusqaykikunapaq yuyaychaykuna", "Satanakamatak iwxt'awinaka"],
  // --- Menú, títulos, botones ---
@@ -1259,6 +1261,13 @@ const TR = {
 };
 // Oraciones con números (plantillas)
 const TRP = [
+ [/^El año más caluroso en su zona desde 1981 fue (\d+)\.$/, ["1981 watamanta, llaqtaykipi aswan q'uñi wataqa $1 karqan.", "1981 maratpacha, markaman juk'amp junt'u marax $1 maranwa."]],
+ [/^El año más frío en su zona desde 1981 fue (\d+)\.$/, ["1981 watamanta, llaqtaykipi aswan chiri wataqa $1 karqan.", "1981 maratpacha, markaman juk'amp thaya marax $1 maranwa."]],
+ [/^El año más lluvioso desde 1981 fue (\d+)\. El más seco fue (\d+)\.$/, ["1981 watamanta, aswan parayuq wataqa $1 karqan. Aswan ch'aki wataqa $2 karqan.", "1981 maratpacha, juk'amp jallun marax $1 maranwa. Juk'amp waña marax $2 maranwa."]],
+ [/^El verano más seco en 45 años fue el de (\d+)\.$/, ["45 watapi aswan ch'aki puquy pachaqa $1 watapi karqan.", "45 maranx juk'amp waña jallu pachax $1 maranwa."]],
+ [/^El mes más lluvioso en su zona es (\S+)\.$/, ["Llaqtaykipi aswan parayuq killaqa $1 killam.", "Markaman juk'amp jallun phaxsix $1 phaxsiwa."]],
+ [/^En los últimos 30 días aquí llovió (.+) \(satélites de la NASA\)\.$/, ["Qhipa 30 p'unchawpi kaypi paran: $1 (NASA satelitekuna).", "Qhipa 30 urunx akan jallux puri: $1 (NASA satelitenaka)."]],
+ [/^En el último mes hubo (\d+) noches de helada\. Lo normal: unas (\d+)\.$/, ["Qhipa killapi $1 tuta qasa karqan. Sapa kutin: $2 hina.", "Qhipa phaxsin $1 aruma juyphi utjäna. Sapa kuti: niya $2."]],
  [/^Temperatura del aire de todo el año, comparada con los años 80: ([+\-−]?[\d.,]+) °C\.$/, ["Llapan watapa wayra q'uñin, 1980 watakunawan tupachisqa: $1 °C.", "Taqi marana thaya junt'upa, 1980 maranakamp chikachata: $1 °C."]],
  [/^En (\S+) casi no llueve$/, ["$1 killapi yaqa manam paranchu", "$1 phaxsinx niya janiw jallux purkiti"]],
  [/^En (\S+) llueve poco$/, ["$1 killapi pisillata paran", "$1 phaxsinx juk'akiw jallux puri"]],
@@ -1266,7 +1275,7 @@ const TRP = [
  [/^En (\S+) casi no llueve\.$/, ["$1 killapi yaqa manam paranchu.", "$1 phaxsinx niya janiw jallux purkiti."]],
  [/^En (\S+) llueve poco\.$/, ["$1 killapi pisillata paran.", "$1 phaxsinx juk'akiw jallux puri."]],
  [/^(\S+) es un mes de lluvias\.$/, ["$1 killaqa para killam.", "$1 phaxsix jallu phaxsiwa."]],
- [/^Paso 2: ¿qué viene en (\S+)\?$/, ["2 ruway: ¿$1 killapi imataq hamunqa?", "2 lurawi: ¿$1 phaxsinx kunas jutani?"]],
+ [/^¿Qué viene en (\S+)\?$/, ["¿$1 killapi imataq hamunqa?", "¿$1 phaxsinx kunas jutani?"]],
  [/^Pronóstico para (\S+)$/, ["$1 killapaq willakuy", "$1 phaxsitak yatiyawi"]],
  [/^Prepárese para (\S+)$/, ["$1 killapaq wakichikuy", "$1 phaxsitak wakichasim"]],
  [/^Lluvia normal en (\S+)$/, ["$1 killapi sapa kutin para", "$1 phaxsinx sapa kuti jallu"]],
@@ -1367,14 +1376,14 @@ const L = {
   dD:{mas:"Hoy hace más calor que en los años 80.", igual:"La temperatura está casi igual que en los años 80."},
   bL:{normal:"¡Riegue como siempre!", mucha:"¡Revise sus acequias!", poca:"¡Cuide el agua!", gris:"Dato no seguro"}, bT:{mucho:"¡Cuide su piel del sol!", mas:"¡Riegue temprano!", normal:"Todo normal", frio:"¡Abríguese!"}, bV:{seco:"¡Guarde agua!", incierto:"¡Esté preparado!"}, bD:{mas:"Más calor que antes", igual:"Casi igual que antes"}, aAcequias:"Revise sus acequias", aNormal:"Riegue como siempre", aPrep:"Esté preparado",
   recuerdo:a=>`Este año se parece a ${a}.`, nota:{media:n=>`Acierta ${n} de cada 10 veces.`, debil:"Aviso poco seguro.", ninguna:"Según los veranos más parecidos."},
-  desde:x=>`Desde 1981 su zona se calentó ${x} °C`, antes:"¿Hace más calor que antes?", masCalor80:"Sí: hoy hace más calor que hace 40 años", igual80:"No: el calor es casi igual que hace 40 años",
+  desde:x=>`Desde 1981 su zona se calentó ${x} °C`, antes:"¿Hace más calor que antes?", masCalor80:x=>`Sí: hoy hace ${x.replace(" más caliente", " más de calor")} que hace 40 años`, igual80:"No: el calor es casi igual que hace 40 años",
   notaCalor:x=>`Temperatura del aire de todo el año, comparada con los años 80: ${x} °C.`, mapa:"Mapa de las zonas", aqui:"Usted está aquí",
   proxMes:"El próximo mes", meses:["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
   mc:["E","F","M","A","M","J","J","A","S","O","N","D"],
   hara:"Hará en promedio", entre:(a,b)=>`entre ${a} y ${b} °C`, lonormal:"Lo normal", porNino:"Por El Niño",
   hacer:"Qué hacer estos días", cuando:"¿Cuándo llueve en su zona?", cuandoNota:"",
   obj:"Yachachiq le ayuda a planificar su chacra con 45 años de datos de la NASA.", pasos:["Hoy","Próximo mes","Mis cultivos"],
-  hoySub:"Lo que pasó en los últimos 30 días", irMes:m=>`Paso 2: ¿qué viene en ${m}?`, irCult:"Paso 3: ¿qué hago con mis cultivos?",
+  hoySub:"Lo que pasó en los últimos 30 días", irMes:m=>`¿Qué viene en ${m}?`, irCult:"¿Qué hago con mis cultivos?",
   prono:m=>`Pronóstico para ${m}`, pronoSub:"Esto es lo que viene el próximo mes. No es el clima de hoy.", prepM:m=>`Prepárese para ${m}`,
   mesMas:"Más calor de lo normal", mesFrio:"Más frío de lo normal", mesIgual:"Como siempre",
   llPal:(m,k)=>[`En ${m} casi no llueve`, `En ${m} llueve poco`, `${m[0].toUpperCase() + m.slice(1)} es un mes de lluvias`][k],
@@ -1398,13 +1407,13 @@ const L = {
   dD:{mas:"Today it is hotter than in the 1980s.", igual:"Temperature is about the same as in the 1980s."},
   bL:{normal:"Irrigate as usual!", mucha:"Check your ditches!", poca:"Save water!", gris:"Data not reliable"}, bT:{mucho:"Protect your skin!", mas:"Irrigate early!", normal:"All normal", frio:"Keep warm!"}, bV:{seco:"Store water!", incierto:"Be prepared!"}, bD:{mas:"Hotter than before", igual:"About the same"}, aAcequias:"Check your ditches", aNormal:"Irrigate as usual", aPrep:"Be prepared",
   recuerdo:a=>`This year looks like ${a}.`, nota:{media:n=>`Right ${n} times out of 10.`, debil:"Weak signal.", ninguna:"Based on the most similar summers."},
-  desde:x=>`Since 1981 your area has warmed ${x} °C`, antes:"Is it hotter than before?", masCalor80:"Yes: it is hotter than 40 years ago", igual80:"No: about as hot as 40 years ago",
+  desde:x=>`Since 1981 your area has warmed ${x} °C`, antes:"Is it hotter than before?", masCalor80:x=>`Yes: it is ${x} than 40 years ago`, igual80:"No: about as hot as 40 years ago",
   notaCalor:x=>`Air temperature over the whole year, compared with the 1980s: ${x} °C.`, mapa:"Map of the areas", aqui:"You are here",
   proxMes:"Next month", meses:["January","February","March","April","May","June","July","August","September","October","November","December"],
   mc:["J","F","M","A","M","J","J","A","S","O","N","D"],
   hara:"Expected average", entre:(a,b)=>`between ${a} and ${b} °C`, lonormal:"Normal", porNino:"Due to El Niño",
   obj:"Yachachiq helps you plan your farm with 45 years of NASA data.", pasos:["Today","Next month","My crops"],
-  hoySub:"What happened in the last 30 days", irMes:m=>`Step 2: what is coming in ${m}?`, irCult:"Step 3: what do I do with my crops?",
+  hoySub:"What happened in the last 30 days", irMes:m=>`What is coming in ${m}?`, irCult:"What do I do with my crops?",
   prono:m=>`Forecast for ${m}`, pronoSub:"This is what is coming next month. It is not today's weather.", prepM:m=>`Get ready for ${m}`,
   mesMas:"Warmer than normal", mesFrio:"Colder than normal", mesIgual:"As usual",
   llPal:(m,k)=>[`It hardly rains in ${m}`, `It rains a little in ${m}`, `${m} is a rainy month`][k],
@@ -1589,23 +1598,39 @@ const SABERES = [
 const SABER_TIPO = {es:{ciencia:"Comprobado con satélites de la NASA", ancestral:"Saber ancestral que sigue funcionando", sena:"Seña de los abuelos"},
                     en:{ciencia:"Confirmed with NASA satellites", ancestral:"Ancestral knowledge still in use", sena:"Elders' sign"}};
 let DATOS_DIA = [], datoI = 0; const DIA_ANIO = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
+// Palabras en vez de números, para que el agricultor entienda
+function veces(x, n) { const en = ln() === "en";
+  if (!(n >= 1)) return x < 1 ? (en ? "almost nothing, as usual" : "casi nada, como siempre") : (en ? "more than normal" : "más de lo normal");
+  const q = x / n;
+  return en ? (q < .2 ? "much less than normal" : q < .4 ? "about a third of normal" : q < .75 ? "about half of normal" : q < 1.3 ? "about normal" : q < 1.75 ? "a bit more than normal" : q < 2.5 ? "about double the normal" : q < 3.5 ? "about triple the normal" : "much more than normal")
+            : (q < .2 ? "mucho menos de lo normal" : q < .4 ? "como la tercera parte de lo normal" : q < .75 ? "como la mitad de lo normal" : q < 1.3 ? "más o menos lo normal" : q < 1.75 ? "un poco más de lo normal" : q < 2.5 ? "como el doble de lo normal" : q < 3.5 ? "como el triple de lo normal" : "mucho más de lo normal"); }
+function cuantoCalor(d) { const en = ln() === "en", a = Math.abs(d);
+  if (a < .5) return en ? "about the same" : "casi igual";
+  const k = a < 1.5 ? 0 : a < 3 ? 1 : 2;
+  return en ? ["a little", "quite a bit", "much"][k] + (d > 0 ? " hotter" : " colder") : ["un poco", "bastante", "mucho"][k] + (d > 0 ? " más caliente" : " más frío"); }
+function cadaCuanto(k, N) { const en = ln() === "en", x = Math.max(1, Math.round(N / Math.max(k, 1)));
+  return x <= 1 ? (en ? "It happens almost every year." : "Pasa casi todos los años.") : (en ? `It happens about once every ${x} years.` : `Pasa más o menos 1 de cada ${x} años.`); }
 function datosDelDia(Z, t) {
-  const en = ln() === "en", f1 = x => fmt(x, 1), f0 = x => fmt(x, 0), M = t.meses, out = [];
+  const en = ln() === "en", M = t.meses, out = [];
   const iMax = a => a.indexOf(Math.max(...a)), iMin = a => a.indexOf(Math.min(...a));
   const h = Z.hist, la = Z.lluvia_anual, vh = Z.veranos_hist, tt = Z.tend_temp, ln_ = Z.lluvia_normal;
-  out.push(en ? `The hottest year in your area since 1981 was ${h.anios[iMax(h.temp)]}, averaging ${f1(Math.max(...h.temp))} °C.` : `El año más caluroso en su zona desde 1981 fue ${h.anios[iMax(h.temp)]}, con ${f1(Math.max(...h.temp))} °C de promedio.`);
-  out.push(en ? `The coldest year in your area since 1981 was ${h.anios[iMin(h.temp)]}, averaging ${f1(Math.min(...h.temp))} °C.` : `El año más frío en su zona desde 1981 fue ${h.anios[iMin(h.temp)]}, con ${f1(Math.min(...h.temp))} °C de promedio.`);
-  out.push(en ? `The rainiest year since 1981 was ${la.anios[iMax(la.mm)]}, with ${f0(Math.max(...la.mm))} mm. The driest was ${la.anios[iMin(la.mm)]}, with only ${f0(Math.min(...la.mm))} mm.` : `El año más lluvioso desde 1981 fue ${la.anios[iMax(la.mm)]}, con ${f0(Math.max(...la.mm))} mm. El más seco fue ${la.anios[iMin(la.mm)]}, con solo ${f0(Math.min(...la.mm))} mm.`);
-  out.push(en ? `The driest summer in 45 years was ${vh.anios[iMin(vh.mm)]}: only ${f0(Math.min(...vh.mm))} mm of rain.` : `El verano más seco en 45 años fue el de ${vh.anios[iMin(vh.mm)]}: solo ${f0(Math.min(...vh.mm))} mm de lluvia.`);
-  out.push(en ? `The last 10 years were ${f1(tt.ultimos10 - tt.decada80)} °C warmer than the 1980s in your area.` : `Los últimos 10 años fueron ${f1(tt.ultimos10 - tt.decada80)} °C más calientes que los años 80 en su zona.`);
-  if (tt.p < .05 && tt.por_decada > 0) out.push(en ? `Your area is warming about ${fmt(tt.por_decada, 2)} °C every 10 years. We detected it with NASA data and a statistical test.` : `Su zona se calienta unos ${fmt(tt.por_decada, 2)} °C cada 10 años. Lo detectamos con datos de la NASA y una prueba estadística.`);
-  const med = ln_.map(m => m[2]), mm = iMax(med);
-  out.push(en ? `The rainiest month in your area is ${M[mm]}: about ${f0(med[mm])} mm in a normal year.` : `El mes más lluvioso en su zona es ${M[mm]}: lo normal son unos ${f0(med[mm])} mm.`);
-  out.push(en ? `In El Niño summers it rains about ${f0(Z.nino.nino)} mm here; in La Niña summers, about ${f0(Z.nino.nina)} mm.` : `En veranos con El Niño aquí llueve unos ${f0(Z.nino.nino)} mm; con La Niña, unos ${f0(Z.nino.nina)} mm.`);
+  out.push(en ? `The hottest year in your area since 1981 was ${h.anios[iMax(h.temp)]}.` : `El año más caluroso en su zona desde 1981 fue ${h.anios[iMax(h.temp)]}.`);
+  out.push(en ? `The coldest year in your area since 1981 was ${h.anios[iMin(h.temp)]}.` : `El año más frío en su zona desde 1981 fue ${h.anios[iMin(h.temp)]}.`);
+  out.push(en ? `The rainiest year since 1981 was ${la.anios[iMax(la.mm)]}. The driest was ${la.anios[iMin(la.mm)]}.` : `El año más lluvioso desde 1981 fue ${la.anios[iMax(la.mm)]}. El más seco fue ${la.anios[iMin(la.mm)]}.`);
+  out.push(en ? `The driest summer in 45 years was ${vh.anios[iMin(vh.mm)]}.` : `El verano más seco en 45 años fue el de ${vh.anios[iMin(vh.mm)]}.`);
+  const dif = tt.ultimos10 - tt.decada80;
+  out.push(Math.abs(dif) < .5 ? (en ? "The last 10 years were about as hot as the 1980s in your area." : "Los últimos 10 años fueron casi igual de calurosos que los años 80 en su zona.")
+                              : (en ? `The last 10 years were ${cuantoCalor(dif)} than the 1980s in your area.` : `Los últimos 10 años fueron ${cuantoCalor(dif).replace("caliente", "calientes").replace("frío", "fríos")} que los años 80 en su zona.`));
+  if (tt.p < .05 && tt.por_decada > 0) out.push(en ? "Your area is warming little by little, and it is not chance: we checked it with NASA data and a statistical test." : "Su zona se está calentando poco a poco, y no es casualidad: lo comprobamos con datos de la NASA y una prueba estadística.");
+  const med = ln_.map(m => m[2]), mm = iMax(med);
+  out.push(en ? `The rainiest month in your area is ${M[mm]}.` : `El mes más lluvioso en su zona es ${M[mm]}.`);
+  if (Z.nino.nina >= 5) { const q = Z.nino.nino / Z.nino.nina, k = q < .6 ? 0 : q < .85 ? 1 : q <= 1.2 ? 2 : q < 1.7 ? 3 : 4;
+    out.push(en ? `In El Niño summers it rains ${["about half as much as", "less than", "about the same as", "more than", "much more than"][k]} in La Niña summers here.`
+                : `En veranos con El Niño aquí llueve ${["como la mitad que", "menos que", "casi lo mismo que", "más que", "mucho más que"][k]} en veranos con La Niña.`); }
   const an = Z.parecidos.map(p => p.verano).slice(-3), anS = an.slice(0, -1).join(", ") + (en ? " and " : " y ") + an.at(-1);
   out.push(en ? `This summer looks like ${anS}, years with El Niño. Do you remember how they were in your field?` : `Este verano se parece a los de ${anS}, años con El Niño. ¿Se acuerda cómo fueron en su chacra?`);
-  out.push(en ? `In the last 30 days it rained ${f0(Z.hoy.lluvia_30_dias_mm)} mm here (NASA satellites). Normal for these dates: ${f0(Z.hoy.lluvia_normal_mm)} mm.` : `En los últimos 30 días llovió ${f0(Z.hoy.lluvia_30_dias_mm)} mm aquí (satélites de la NASA). Lo normal para estas fechas: ${f0(Z.hoy.lluvia_normal_mm)} mm.`);
-  if (Z.heladas && Z.heladas.normal_mediana > 0) out.push(en ? `In the last month there were ${Z.heladas.noches_helada} frost nights. Normal for these dates: about ${Z.heladas.normal_mediana}.` : `En el último mes hubo ${Z.heladas.noches_helada} noches de helada. Lo normal para estas fechas: unas ${Z.heladas.normal_mediana}.`);
+  out.push(en ? `In the last 30 days it rained ${veces(Z.hoy.lluvia_30_dias_mm, Z.hoy.lluvia_normal_mm)} here (NASA satellites).` : `En los últimos 30 días aquí llovió ${veces(Z.hoy.lluvia_30_dias_mm, Z.hoy.lluvia_normal_mm)} (satélites de la NASA).`);
+  if (Z.heladas && Z.heladas.normal_mediana > 0) out.push(en ? `In the last month there were ${Z.heladas.noches_helada} frost nights. Normal: about ${Z.heladas.normal_mediana}.` : `En el último mes hubo ${Z.heladas.noches_helada} noches de helada. Lo normal: unas ${Z.heladas.normal_mediana}.`);
   const r = out.map(t => ({t, vivo: false})), k0 = DIA_ANIO % r.length;
   return [...r.slice(k0), ...r.slice(0, k0)];
 }
@@ -1834,14 +1859,14 @@ function pintar() {
 
   // 1) HOY: lo que pasó en los últimos 30 días + la tendencia desde 1981
   DATOS_DIA = datosDelDia(Z, t);
-  document.getElementById("inicio").innerHTML = `${pasosHTML(1)}
+  document.getElementById("inicio").innerHTML = `
     <h2 class="hHoy">${t.hoy} <span id="fechaVivo">${fechaVivoHTML(z)}</span></h2>
     <div class="subH">${t.hoySub}</div>
     <div class="dos"><div class="tiles">
       ${semaforo("s1", t.lluvia, mL)}
       ${mH ? semaforo("s2", t.hel, mH, t.hNota(Z.heladas.normal_mediana)) : semaforo("s2", t.temp, mT)}
       <button class="sem ancho" data-voz="desde"><div class="luz" style="border-color:${subio >= .5 ? HEX.rojo : HEX.verde}">${ico("arena", 40)}</div>
-        <div><div class="t">${t.antes}</div><div class="v">${subio >= .5 ? t.masCalor80 : t.igual80}</div><div class="nota">${t.notaCalor(sg(subio))}</div></div><span class="vz">${ico("parlante", 34)}</span></button>
+        <div><div class="t">${t.antes}</div><div class="v">${subio >= .5 ? t.masCalor80(cuantoCalor(subio)) : t.igual80}</div></div><span class="vz">${ico("parlante", 34)}</span></button>
     </div><div><div id="mapa" aria-label="${t.mapa}"></div></div></div>
     ${avIdi ? `<div class="soloMovil">${avIdi}</div>` : ""}
     ${irBtn("chacra", t.irMes(mesN))}
@@ -1869,7 +1894,7 @@ function pintar() {
                           : {d:`En ${mesN} hará unos ${fmt(pm.temp_esperada, 0)} grados, ${dif > .5 ? "más calor de lo normal" : "como siempre"}.`, b:`${fmt(pm.temp_esperada, 0)} °C`};
   voz.llmes = {d:t.llPal(mesN, llSig < 3 ? 0 : mesLluvioso ? 2 : 1) + ".", b:t.llNormMes(mesN)};
   voz.tareas = {d:tareas.join(". ") + ".", b:tareas[0]};
-  document.getElementById("chacra").innerHTML = `${pasosHTML(2)}
+  document.getElementById("chacra").innerHTML = `
     <div class="pronoBan">${ico("calendario", 54)}<div><div class="pt">${t.prono(mesN)}</div><div class="ps">${t.pronoSub}</div></div></div>
     <div class="col2"><div>
     <div class="grande" data-voz="mes"><span class="etq">${t.proxMes}</span>
@@ -1892,7 +1917,7 @@ function pintar() {
 `;
   document.querySelectorAll(".icSab").forEach(e => e.innerHTML = ico("foco", 30));
   document.querySelectorAll(".txSab").forEach(e => e.textContent = ln() === "en" ? "Andean knowledge" : xq("saber", "Saberes ancestrales"));
-  document.getElementById("cultivos").innerHTML = pasosHTML(3) + cultivosHTML(z, mL, mT, mV, mH);
+  document.getElementById("cultivos").innerHTML = cultivosHTML(z, mL, mT, mV, mH);
 
   // INFORMACIÓN
   document.getElementById("info").innerHTML = `<div class="info2">
