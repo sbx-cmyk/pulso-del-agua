@@ -1112,6 +1112,7 @@ function elegirIdioma(l) { lang = l; try { localStorage.setItem("idioma", l); lo
 // ---------- Traducción COMPLETA a quechua (Collao) y aimara — BORRADOR para revisión con hablantes de Moquegua ----------
 // Funciona oración por oración: lo que se ve en pantalla y lo que dice el agricultor. Lo que no está aquí queda en castellano.
 const TR = {
+ "Nuestro reto de la NASA": ["NASA nisqapa atipanakuyniyku", "NASA ukan atipt'äwisa"],
  "Hoy": ["Kunan", "Jichhüru"], "Próximo mes": ["Hamuq killa", "Jutir phaxsi"], "Ahora": ["Kunan", "Jichhaxa"],
  "Yachachiq le ayuda a planificar su chacra con 45 años de datos de la NASA.": ["Yachachiqqa chakraykita wakichinaykipaq yanapasunki, NASA nisqapa 45 wata willakuyninkunawan.", "Yachachiqax yapuma wakichañatakiw yanapt'ätam, NASA ukan 45 mara yatiyawinakapampi."],
  "Lo que pasó en los últimos 30 días": ["Qhipa 30 p'unchawkunapi imakunachus karqan", "Qhipa 30 urunakan kunas utjawayi"],
@@ -1885,6 +1886,9 @@ function pintar() {
     <div class="info"><h2 style="margin-top:0">${t.qEs}</h2><p>${t.qEsT}</p></div>
     <figure class="foto"><img src="foto_chacra.jpg" alt="${ln() === "en" ? "A farm in Moquegua" : "Una chacra en Moquegua"}" onerror="this.parentElement.remove()">
       <figcaption>${ln() === "en" ? "Photo: Team TROYA, Moquegua" : "Foto: equipo TROYA, Moquegua"}</figcaption></figure>
+    <div class="info"><h2 style="margin-top:0">${ln() === "en" ? "Our NASA challenge" : "Nuestro reto de la NASA"}</h2><p>${ln() === "en"
+      ? "<b>Be An Earth System Trend Detective!</b> The Earth system is the air, the water, the ocean and the land working together. We looked for trends in 45 years of NASA data for Moquegua: heat (air), rain (water) and El Niño (ocean), and turned them into decisions for the farm (land)."
+      : "<b>Be An Earth System Trend Detective!</b> (Detective de tendencias del sistema Tierra). El sistema Tierra es el aire, el agua, el océano y el suelo funcionando juntos. Buscamos tendencias en 45 años de datos de la NASA para Moquegua: calor (aire), lluvia (agua) y El Niño (océano), y las convertimos en decisiones para la chacra (suelo)."}</p></div>
     <div class="info"><h2 style="margin-top:0">${t.colores}</h2><p>${t.colT}</p></div>
     <div class="info"><h2 style="margin-top:0">${t.noSabe}</h2><p>${t.noSabeT}</p></div>
     <div class="info equipo"><img class="logoT logoG" src="${LOGO_T}" alt="Logo de TROYA"><div><h2 style="margin-top:0">${t.equipo}</h2><p>${t.equipoT}</p></div></div>
