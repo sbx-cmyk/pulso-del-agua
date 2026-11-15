@@ -123,6 +123,7 @@
     .tituloM{margin-bottom:8px;line-height:2}
   }
   .leaflet-attribution-flag{display:none!important}
+  #btnUbic.buscando{animation:latido 1s ease-in-out infinite}@keyframes latido{50%{transform:scale(1.15);opacity:.6}}
   .leaflet-tooltip.aqui{background:#1f5a2e;color:#fff;border:0;font-size:14px;font-family:Nunito,sans-serif;padding:6px 12px;border-radius:14px}
   .leaflet-tooltip.aqui:before{border-top-color:#1f5a2e}
 
@@ -949,6 +950,12 @@ const TR = {
  "Quiénes somos": ["Pikunataq kayku", "Khitinakas jiwasa"], "Equipo TROYA, estudiantes de la UNAM (Moquegua), para el NASA Space Apps Challenge 2026.": ["TROYA huñu, UNAM (Moquegua) yachaqakuna, NASA Space Apps Challenge 2026 nisqapaq.", "TROYA tama, UNAM (Moquegua) yatiqirinaka, NASA Space Apps Challenge 2026 ukataki."],
  "De dónde salen los consejos": ["Maymanta yuyaychaykuna hamun", "Kawkits iwxanakax juti"], "La lista completa está en la página técnica.": ["Llapan sutikuna técnica p'anqapi kachkan.", "Taqpach sutinakax técnica laphin utji."],
  "Para revisores: detalle técnico y pruebas del modelo": ["Qhawaqkunapaq: técnica, modelopa pruebankunapas", "Uñakipirinakataki: técnica, modelon yant'awinakapasa"], "Pronto: calendario de siembra y cosecha.": ["Hamuq: tarpuy, hallmay pacha kalendario.", "Jutiri: yapuchaña, apthapiña kalendario."],
+ "El permiso de ubicación está bloqueado.": ["Maypi kasqayki willakuy permisoqa hark'asqam kachkan.", "Kawkinkatas uk yatiyañ permisox jark'atawa."],
+ "Toque el candado junto a la dirección web, permita Ubicación y vuelva a intentar.": ["Web direccionpa qayllanpi candadota llamiy, Ubicación nisqata saqiy, hinaspa watiqmanta ruway.", "Web direccion jak'an candado llamkt'am, Ubicación jaytam, ukat wasitat yant'am."],
+ "Active la ubicación (GPS) de su celular y vuelva a intentar.": ["Celularniykipa GPS-ninta kichay, watiqmanta ruway.", "Celularaman GPS jist'aram, wasitat yant'am."],
+ "El GPS demoró mucho.": ["GPS-qa ancha unaykurqan.", "GPS-x wali qhipt'iwa."], "Salga a un lugar abierto o vuelva a intentar.": ["Kichasqa pampaman lluqsiy utaq watiqmanta ruway.", "Jist'arat chiqar mistum jan ukax wasitat yant'am."],
+ "Parece que usted está lejos de Moquegua.": ["Moqueguamanta karupi kachkankichá.", "Moquegua markat jayankaspa."], "Elija su zona en la lista.": ["Llaqtaykita listapi akllay.", "Markama listan ajllim."],
+ "Este equipo no puede dar su ubicación.": ["Kay equipoqa mana maypi kasqaykita willayta atinchu.", "Aka equipox janiw kawkinkatas yatiyañ atkiti."],
  "No se pudo ubicar.": ["Mana tarikurqanchu maypi kasqayki.", "Janiw kawkinkatasa jikxatkiti."], "Elija su zona en la lista.": ["Llaqtaykita listapi akllay.", "Markama listan ajllim."],
  "Datos:": ["Willakuykuna:", "Yatiyawinaka:"], "Mapa: © colaboradores de OpenStreetMap.": ["Mapa: © OpenStreetMap yanapaqkuna.", "Mapa: © OpenStreetMap yanapirinaka."],
  "Código, íconos e ilustraciones hechos con ayuda de un asistente de IA (Claude) y revisados por el equipo TROYA.": ["Código, íconokuna, siq'ikunapas IA yanapaqwan (Claude) ruwasqa, TROYA huñuwan qhawasqa.", "Código, ícononaka, dibujonakasa IA yanapiri (Claude) ukamp lurata, TROYA tamamp uñakipata."],
@@ -1641,14 +1648,28 @@ function pintar() {
 function cambiar() { try { localStorage.setItem("zona", sel.value); } catch(e) {} pintar(); }
 sel.onchange = cambiar;
 function ubicar(manual) {
-  const avisar = () => { if (manual) document.getElementById("avisoIdioma").innerHTML = `<div class="aviso">${tx().noUbic}</div>`; };
-  if (!navigator.geolocation) return avisar();
-  try { navigator.geolocation.getCurrentPosition(p => {
-      const la = p.coords.latitude, lo = p.coords.longitude; window.miPos = [la, lo];
-      let best = D.zonas[0], dm = 1e9; D.zonas.forEach(z => { const c = D.zona[z].coord, d = (c[0] - la) ** 2 + (c[1] - lo) ** 2; if (d < dm) { dm = d; best = z; } });
-      if (dm > 1.5 ** 2) { window.miPos = null; return avisar(); }   // lejos de Moquegua (más de ~150 km): que elija su zona a mano
-      if (sel.value !== best) { sel.value = best; cambiar(); } else dibujarMapa(best); }, avisar, {timeout:10000, maximumAge:600000, enableHighAccuracy:false});
-  } catch(e) { avisar(); }
+  const en = ln() === "en";
+  const MSJ = {1: en ? "Location permission is blocked. Tap the lock next to the web address, allow Location and try again." : "El permiso de ubicación está bloqueado. Toque el candado junto a la dirección web, permita Ubicación y vuelva a intentar.",
+    2: en ? "Turn on your phone's location (GPS) and try again." : "Active la ubicación (GPS) de su celular y vuelva a intentar.",
+    3: en ? "The GPS took too long. Go outdoors or try again." : "El GPS demoró mucho. Salga a un lugar abierto o vuelva a intentar.",
+    lejos: en ? "You seem to be far from Moquegua. Choose your area from the list." : "Parece que usted está lejos de Moquegua. Elija su zona en la lista.",
+    no: en ? "This device cannot share its location. Choose your area from the list." : "Este equipo no puede dar su ubicación. Elija su zona en la lista."};
+  const avisar = k => { if (manual) { const el = document.getElementById("avisoIdioma"); el.innerHTML = `<div class="aviso">${MSJ[k] || MSJ[2]}</div>`; if (typeof trDOM === "function") trDOM(el); } };
+  if (!navigator.geolocation || !window.isSecureContext) return avisar("no");
+  const btn = document.getElementById("btnUbic"); if (manual && btn) btn.classList.add("buscando");
+  const listo = () => btn && btn.classList.remove("buscando");
+  const ok = p => { listo();
+    const la = p.coords.latitude, lo = p.coords.longitude;
+    let best = D.zonas[0], dm = 1e9; D.zonas.forEach(z => { const c = D.zona[z].coord, d = (c[0] - la) ** 2 + (c[1] - lo) ** 2; if (d < dm) { dm = d; best = z; } });
+    if (dm > 1.5 ** 2) { window.miPos = null; return avisar("lejos"); }   // lejos de Moquegua (más de ~150 km): que elija su zona a mano
+    window.miPos = [la, lo]; document.getElementById("avisoIdioma").querySelector(".aviso")?.remove();
+    if (sel.value !== best) { sel.value = best; cambiar(); } else dibujarMapa(best); };
+  // 1.º intento rápido (red/wifi); si falla por tiempo o no hay señal, 2.º intento con GPS de alta precisión
+  try { navigator.geolocation.getCurrentPosition(ok, e => {
+      if (e.code === 1) { listo(); return avisar(1); }
+      navigator.geolocation.getCurrentPosition(ok, e2 => { listo(); avisar(e2.code); }, {enableHighAccuracy:true, timeout:25000, maximumAge:0});
+    }, {enableHighAccuracy:false, timeout:12000, maximumAge:600000});
+  } catch(e) { listo(); avisar("no"); }
 }
 document.getElementById("btnUbic").onclick = () => ubicar(true);
 let guardada = null; try { guardada = localStorage.getItem("zona"); } catch(e) {}
