@@ -107,7 +107,7 @@
   .pasos .fl{color:var(--sub);font-weight:800}
   #chacra .pasos button.on{border-color:#5b47c4;color:#4a38a8;background:#efecfb} #chacra .pasos button.on b{background:#5b47c4}
   .subH{color:var(--sub);font-weight:700;margin:-6px 2px 10px;font-size:.95rem}
-  .tiles .sem.ancho{grid-column:1/-1;flex-direction:row!important;align-items:center!important;min-height:0!important}
+  .tiles .sem.ancho > div{padding-right:36px} .tiles .sem.ancho{grid-column:1/-1;flex-direction:row!important;align-items:center!important;min-height:0!important}
   .irSig{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin:14px 0;padding:16px 18px;border:0;border-radius:18px;background:var(--verdeO);color:#fff;font:inherit;font-weight:800;font-size:1.1rem;cursor:pointer;text-align:left}
   .irSig span{font-size:1.8rem;line-height:1}
   #chacra .irSig{background:#5b47c4}
@@ -1068,7 +1068,7 @@ const QA = {
   bL: {normal: "¡Sapa kutin hina qarpay!", mucha: "¡Yarqhaykita qhawariy!", poca: "¡Yakuta waqaychay!", gris: "Mana sut'ichu"},
   bT: {mucho: "¡Qarakita intimanta amachay!", mas: "¡Tutamanta qarpay!", normal: "Llapan allin", frio: "¡P'achallikuy!"},
   bV: {seco: "¡Yakuta waqaychay!", incierto: "¡Wakichikuy!"}, bD: {mas: "Ñawpaqmanta aswan ruphay", igual: "Ñawpaq hinallataq"},
-  antes: "¿Ñawpaqmanta aswan q'uñichu?", masCalor80: x => "Arí: kunanqa 40 wata ñawpaqmanta aswan q'uñi", igual80: "Manam: 40 wata ñawpaq hinallataq", notaCalor: x => `Llapan watapa wayra q'uñin, 1980 watakunawan tupachisqa: ${x} °C.`, aqui: "Kaypi kachkanki",
+  antes: "40 wata ñawpaqwan tupachisqa q'uñi", masCalor80: x => "Aswan q'uñi", igual80: "Kikillan", notaCalor: x => `Llapan watapa wayra q'uñin, 1980 watakunawan tupachisqa: ${x} °C.`, aqui: "Kaypi kachkanki",
   proxMes: "Hamuq killa", hara: "Yaqa kayhina kanqa", lonormal: "Sapa kutin", porNino: "El Niño rayku",
   hacer: "Kay p'unchawkunapi ima ruwana", cuando: "¿Hayk'aqtaq llaqtaykipi paran?",
   prep: "Qhichwa simipi (Collao) — <b>borrador</b>: hablantes de Moquegua revisachkanku. Rimaynin, unay qillqakunapas, kunanqa castellanopi."},
@@ -1082,7 +1082,7 @@ const QA = {
   bL: {normal: "¡Sapa kuti qarpam!", mucha: "¡Larq'ama uñakipam!", poca: "¡Uma imt'am!", gris: "Janiw qhanakiti"},
   bT: {mucho: "¡Inti lupit jark'aqasim!", mas: "¡Alwata qarpam!", normal: "Taqikuna walikiwa", frio: "¡Thayat jark'aqasim!"},
   bV: {seco: "¡Uma imt'am!", incierto: "¡Wakicht'asim!"}, bD: {mas: "Nayrat sipans juk'amp junt'u", igual: "Nayra pachjamaki"},
-  antes: "¿Nayrat sipans juk'amp junt'uti?", masCalor80: x => "Jisa: jichhax 40 mara nayrat sipans juk'amp junt'u", igual80: "Janiw: 40 mara nayrjamakiwa", notaCalor: x => `Taqi marana thaya junt'upa, 1980 maranakamp chikachata: ${x} °C.`, aqui: "Akankasktawa",
+  antes: "40 mara nayrampi chikachata junt'u", masCalor80: x => "Juk'amp junt'u", igual80: "Pachpakiwa", notaCalor: x => `Taqi marana thaya junt'upa, 1980 maranakamp chikachata: ${x} °C.`, aqui: "Akankasktawa",
   proxMes: "Jutir phaxsi", hara: "Niya akhamäniwa", lonormal: "Sapa kuti", porNino: "El Niño layku",
   hacer: "Aka urunakan kuns luraña", cuando: "¿Kunapachas markaman jallu purí?",
   prep: "Aymar arun — <b>borrador</b>: Moquegua aymar arsurinakampiw uñakipaski. Arupax, jach'a qillqanakas, jichhakamax kastill arunkiwa."}
@@ -1376,7 +1376,7 @@ const L = {
   dD:{mas:"Hoy hace más calor que en los años 80.", igual:"La temperatura está casi igual que en los años 80."},
   bL:{normal:"¡Riegue como siempre!", mucha:"¡Revise sus acequias!", poca:"¡Cuide el agua!", gris:"Dato no seguro"}, bT:{mucho:"¡Cuide su piel del sol!", mas:"¡Riegue temprano!", normal:"Todo normal", frio:"¡Abríguese!"}, bV:{seco:"¡Guarde agua!", incierto:"¡Esté preparado!"}, bD:{mas:"Más calor que antes", igual:"Casi igual que antes"}, aAcequias:"Revise sus acequias", aNormal:"Riegue como siempre", aPrep:"Esté preparado",
   recuerdo:a=>`Este año se parece a ${a}.`, nota:{media:n=>`Acierta ${n} de cada 10 veces.`, debil:"Aviso poco seguro.", ninguna:"Según los veranos más parecidos."},
-  desde:x=>`Desde 1981 su zona se calentó ${x} °C`, antes:"¿Hace más calor que antes?", masCalor80:x=>`Sí: hoy hace ${x.replace(" más caliente", " más de calor")} que hace 40 años`, igual80:"No: el calor es casi igual que hace 40 años",
+  desde:x=>`Desde 1981 su zona se calentó ${x} °C`, antes:"Calor comparado con hace 40 años", masCalor80:x=>{ const s = x.replace(" más caliente", " más de calor"); return s[0].toUpperCase() + s.slice(1); }, igual80:"Casi igual",
   notaCalor:x=>`Temperatura del aire de todo el año, comparada con los años 80: ${x} °C.`, mapa:"Mapa de las zonas", aqui:"Usted está aquí",
   proxMes:"El próximo mes", meses:["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
   mc:["E","F","M","A","M","J","J","A","S","O","N","D"],
@@ -1407,7 +1407,7 @@ const L = {
   dD:{mas:"Today it is hotter than in the 1980s.", igual:"Temperature is about the same as in the 1980s."},
   bL:{normal:"Irrigate as usual!", mucha:"Check your ditches!", poca:"Save water!", gris:"Data not reliable"}, bT:{mucho:"Protect your skin!", mas:"Irrigate early!", normal:"All normal", frio:"Keep warm!"}, bV:{seco:"Store water!", incierto:"Be prepared!"}, bD:{mas:"Hotter than before", igual:"About the same"}, aAcequias:"Check your ditches", aNormal:"Irrigate as usual", aPrep:"Be prepared",
   recuerdo:a=>`This year looks like ${a}.`, nota:{media:n=>`Right ${n} times out of 10.`, debil:"Weak signal.", ninguna:"Based on the most similar summers."},
-  desde:x=>`Since 1981 your area has warmed ${x} °C`, antes:"Is it hotter than before?", masCalor80:x=>`Yes: it is ${x} than 40 years ago`, igual80:"No: about as hot as 40 years ago",
+  desde:x=>`Since 1981 your area has warmed ${x} °C`, antes:"Heat compared with 40 years ago", masCalor80:x=>x[0].toUpperCase() + x.slice(1), igual80:"About the same",
   notaCalor:x=>`Air temperature over the whole year, compared with the 1980s: ${x} °C.`, mapa:"Map of the areas", aqui:"You are here",
   proxMes:"Next month", meses:["January","February","March","April","May","June","July","August","September","October","November","December"],
   mc:["J","F","M","A","M","J","J","A","S","O","N","D"],
