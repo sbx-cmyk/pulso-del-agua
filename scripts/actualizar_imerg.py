@@ -1,6 +1,6 @@
 """Robot de Yachachiq: lluvia diaria del satelite GPM IMERG (NASA) para las 6 zonas de Moquegua.
 
-- Baja IMERG Late diario (GPM_3IMERGDL.07) desde GES DISC por OPeNDAP, con el token de Earthdata
+- Baja IMERG Late diario (GPM_3IMERGDL.07) desde Earthdata Cloud por OPeNDAP, con el token de Earthdata
   guardado como secreto EARTHDATA_TOKEN en GitHub (nunca se escribe en el codigo).
 - Guarda la serie diaria en imerg_diario.json (se va completando: primero los dias recientes,
   despues la historia desde 2001).
@@ -8,7 +8,7 @@
   fechas de cada ano (2001 en adelante). La app la usa en "Lluvia este mes".
 Equipo TROYA - NASA Space Apps 2026.
 """
-import datetime as dt, http.cookiejar, json, os, re, sys, time, urllib.error, urllib.request
+import datetime as dt, http.cookiejar, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 ZONAS = {
@@ -20,7 +20,9 @@ ZONAS = {
     "Altiplano (represa Pasto Grande)": (-16.73, -70.22),
 }
 NOMBRES = list(ZONAS)
-BASE = "https://gpm1.gesdisc.eosdis.nasa.gov/opendap/GPM_L3/GPM_3IMERGDL.07"
+COLECCION = "C2723754859-GES_DISC"   # GPM_3IMERGDL.07 en Earthdata Cloud (los servidores viejos de GES DISC cerraron en 2026)
+OPENDAP = f"https://opendap.earthdata.nasa.gov/collections/{COLECCION}/granules/"
+CMR = "https://cmr.earthdata.nasa.gov/search/granules.json"
 INICIO = dt.date(2001, 1, 1)
 CACHE, SALIDA = "imerg_diario.json", "imerg.json"
 PRESUPUESTO = int(os.environ.get("IMERG_DIAS", "400"))   # dias nuevos a bajar en esta corrida
@@ -58,8 +60,8 @@ def pedir(url, intentos=3):
             if e.code == 404:
                 return None
             if e.code in (401, 403):
-                raise SystemExit(f"Earthdata rechazo el token ({e.code}). Revise que el token no haya vencido y que la "
-                                 "aplicacion 'NASA GESDISC DATA ARCHIVE' este autorizada en su perfil de Earthdata.")
+                raise SystemExit(f"Earthdata rechazo el token ({e.code}) en {url[:90]}. Revise que el token no haya vencido "
+                                 "y que la aplicacion 'NASA GESDISC DATA ARCHIVE' este autorizada en su perfil de Earthdata.")
             ultimo = f"HTTP {e.code}"
         except Exception as e:  # red inestable
             ultimo = repr(e)
@@ -68,57 +70,65 @@ def pedir(url, intentos=3):
     return "ERROR"
 
 
-ARCHIVOS = {}
+GRANULOS = {}   # "AAAAMMDD" -> nombre del granulo (la version puede cambiar: V07B, V07C...)
 
 
-def archivos_del_mes(y, m):
-    """Nombre de cada archivo diario del mes (la version puede cambiar: V07A, V07B...)."""
-    k = (y, m)
-    if k not in ARCHIVOS:
-        html = pedir(f"{BASE}/{y}/{m:02d}/contents.html") or ""
-        ARCHIVOS[k] = {f[25:33]: f for f in set(re.findall(r"3B-DAY-L\.MS\.MRG\.3IMERG\.\d{8}-S000000-E235959\.V07\w*\.nc4", html))}
-    return ARCHIVOS[k]
+def buscar_granulos(desde, hasta):
+    """Pregunta al catalogo CMR de la NASA (publico) que archivos diarios existen entre dos fechas."""
+    pagina = 1
+    while True:
+        q = urllib.parse.urlencode({"collection_concept_id": COLECCION, "page_size": 400, "page_num": pagina,
+                                    "temporal": f"{desde}T00:00:00Z,{hasta}T23:59:59Z", "sort_key": "start_date"})
+        txt = pedir(f"{CMR}?{q}")
+        if txt in (None, "ERROR"):
+            return
+        ent = json.loads(txt)["feed"]["entry"]
+        for e in ent:
+            m = re.search(r"3IMERG\.(\d{8})-S000000", e["title"])
+            if m:
+                GRANULOS[m.group(1)] = e["title"]
+        if len(ent) < 400:
+            return
+        pagina += 1
 
 
 def leer_ascii(txt):
-    """Lee la salida .ascii de OPeNDAP: lon[], lat[] y precipitation[time][lon][lat]."""
-    lineas = [l.strip() for l in txt.splitlines() if l.strip()]
-    vec, filas, actual = {}, [], None
-    for l in lineas:
-        if l.startswith("["):
-            filas.append([float(v) for v in l.split(",")[1:]])
-        elif (m := re.match(r"^(?:\w+\.)?(lon|lat)\[", l)):
-            actual = m.group(1)
-        elif actual and re.match(r"^-?\d", l):
-            vec[actual] = [float(v) for v in l.split(",")]
-            actual = None
-    return vec.get("lon"), vec.get("lat"), filas
+    """Lee la salida .ascii de OPeNDAP (Earthdata Cloud): lon, lat y una fila de lluvia por cada lon."""
+    lon = lat = None; filas = []
+    for l in txt.splitlines():
+        p = [x.strip() for x in l.split(",")]
+        if not p or len(p) < 2:
+            continue
+        if p[0] == "lon":
+            lon = [float(v) for v in p[1:]]
+        elif p[0] == "lat":
+            lat = [float(v) for v in p[1:]]
+        elif p[0].startswith("precipitation.precipitation[") or p[0].startswith("precipitation["):
+            filas.append([float(v) for v in p[1:]])
+    return lon, lat, filas
 
 
 def bajar_dia(d):
     if time.time() > LIMITE:
         return d, "ERROR"
-    f = archivos_del_mes(d.year, d.month).get(d.strftime("%Y%m%d"))
-    if not f:
+    g = GRANULOS.get(d.strftime("%Y%m%d"))
+    if not g:
         return d, None
-    q = f"precipitation[0:0][{LO0}:{LO1}][{LA0}:{LA1}],lon[{LO0}:{LO1}],lat[{LA0}:{LA1}]"
-    txt = pedir(f"{BASE}/{d.year}/{d.month:02d}/{f}.ascii?{q}")
+    q = urllib.parse.quote(f"precipitation[0:0][{LO0}:{LO1}][{LA0}:{LA1}],lon[{LO0}:{LO1}],lat[{LA0}:{LA1}]", safe=",")
+    txt = pedir(f"{OPENDAP}{urllib.parse.quote(g, safe='')}.ascii?{q}")
     if txt in (None, "ERROR"):
         return d, txt
     lon, lat, filas = leer_ascii(txt)
-    if not lon or not lat or not filas:
-        print("  formato inesperado:", f, txt[:300].replace("\n", " | "))
+    if not lon or not lat or len(filas) != len(lon) or any(len(f) != len(lat) for f in filas):
+        print("  formato inesperado:", g, txt[:300].replace("\n", " | "))
         return d, "ERROR"
-    # filas: una por lon (cada una con todos los lat); si viniera al reves, se transpone
-    if len(filas) == len(lat) and len(filas[0]) == len(lon) and len(lon) != len(lat):
-        filas = [list(c) for c in zip(*filas)]
     vals = []
     for nombre in NOMBRES:
         y, x = ZONAS[nombre]
         i = min(range(len(lon)), key=lambda k: abs(lon[k] - x))
         j = min(range(len(lat)), key=lambda k: abs(lat[k] - y))
         v = filas[i][j]
-        vals.append(None if v < 0 else round(v, 2))
+        vals.append(None if v < 0 else round(v, 3))
     return d, vals
 
 
@@ -133,6 +143,10 @@ def main():
     faltan = [d for d in reversed(todos) if d.strftime("%Y%m%d") not in dias]   # primero lo reciente
     tanda = faltan[:PRESUPUESTO]
     print(f"Dias guardados: {len(dias)} | faltan: {len(faltan)} | se bajan ahora: {len(tanda)}")
+    if tanda:
+        for y in range(min(tanda).year, max(tanda).year + 1):
+            buscar_granulos(max(dt.date(y, 1, 1), min(tanda)), min(dt.date(y, 12, 31), max(tanda)))
+        print("Archivos IMERG encontrados en el catalogo:", len(GRANULOS))
     nuevos = 0
     with ThreadPoolExecutor(HILOS) as ex:
         for d, vals in ex.map(bajar_dia, tanda):
