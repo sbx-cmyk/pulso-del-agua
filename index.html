@@ -117,6 +117,7 @@
   .pronoBan svg{background:#fff;border-radius:14px;padding:4px;flex:none}
   #chacra .grande,#chacra .sem,#chacra .tarea2{border-color:#d6cff5;border-style:dashed}
   #chacra .grande{position:relative}
+  #chacra .v2{font-size:1.35rem;font-weight:900;color:#4a38a8;margin-top:4px}
   #chacra .etq{display:inline-block;background:#efecfb;color:#4a38a8;font-weight:900;font-size:.8rem;text-transform:uppercase;border-radius:999px;padding:3px 10px;margin-bottom:6px}
   #chacra .btnSaberes{margin-top:14px}
   @media (max-width:800px){ .obj{font-size:.82rem;margin-bottom:4px} .pasos{gap:5px} .pasos .fl{display:none} .pasos button{font-size:.76rem;padding:6px 3px;gap:4px;letter-spacing:-.01em} .pasos button b{width:18px;height:18px;font-size:.72rem} .subH{font-size:.85rem;margin-bottom:8px} .pronoBan .pt{font-size:1.1rem} }
@@ -1066,7 +1067,7 @@ const QA = {
   bL: {normal: "¡Sapa kutin hina qarpay!", mucha: "¡Yarqhaykita qhawariy!", poca: "¡Yakuta waqaychay!", gris: "Mana sut'ichu"},
   bT: {mucho: "¡Qarakita intimanta amachay!", mas: "¡Tutamanta qarpay!", normal: "Llapan allin", frio: "¡P'achallikuy!"},
   bV: {seco: "¡Yakuta waqaychay!", incierto: "¡Wakichikuy!"}, bD: {mas: "Ñawpaqmanta aswan ruphay", igual: "Ñawpaq hinallataq"},
-  antes: "1980 watakunawan tupachisqa", masCalor80: "1980 watakunamanta aswan ruphay", igual80: "1980 watakuna hinallataq", aqui: "Kaypi kachkanki",
+  antes: "¿Ñawpaqmanta aswan q'uñichu?", masCalor80: "Arí: kunanqa 40 wata ñawpaqmanta aswan q'uñi", igual80: "Manam: 40 wata ñawpaq hinallataq", notaCalor: x => `Llapan watapa wayra q'uñin, 1980 watakunawan tupachisqa: ${x} °C.`, aqui: "Kaypi kachkanki",
   proxMes: "Hamuq killa", hara: "Yaqa kayhina kanqa", lonormal: "Sapa kutin", porNino: "El Niño rayku",
   hacer: "Kay p'unchawkunapi ima ruwana", cuando: "¿Hayk'aqtaq llaqtaykipi paran?",
   prep: "Qhichwa simipi (Collao) — <b>borrador</b>: hablantes de Moquegua revisachkanku. Rimaynin, unay qillqakunapas, kunanqa castellanopi."},
@@ -1080,7 +1081,7 @@ const QA = {
   bL: {normal: "¡Sapa kuti qarpam!", mucha: "¡Larq'ama uñakipam!", poca: "¡Uma imt'am!", gris: "Janiw qhanakiti"},
   bT: {mucho: "¡Inti lupit jark'aqasim!", mas: "¡Alwata qarpam!", normal: "Taqikuna walikiwa", frio: "¡Thayat jark'aqasim!"},
   bV: {seco: "¡Uma imt'am!", incierto: "¡Wakicht'asim!"}, bD: {mas: "Nayrat sipans juk'amp junt'u", igual: "Nayra pachjamaki"},
-  antes: "1980 maranakamp chikachata", masCalor80: "1980 maranakat juk'amp junt'u", igual80: "1980 maranakjamaki", aqui: "Akankasktawa",
+  antes: "¿Nayrat sipans juk'amp junt'uti?", masCalor80: "Jisa: jichhax 40 mara nayrat sipans juk'amp junt'u", igual80: "Janiw: 40 mara nayrjamakiwa", notaCalor: x => `Taqi marana thaya junt'upa, 1980 maranakamp chikachata: ${x} °C.`, aqui: "Akankasktawa",
   proxMes: "Jutir phaxsi", hara: "Niya akhamäniwa", lonormal: "Sapa kuti", porNino: "El Niño layku",
   hacer: "Aka urunakan kuns luraña", cuando: "¿Kunapachas markaman jallu purí?",
   prep: "Aymar arun — <b>borrador</b>: Moquegua aymar arsurinakampiw uñakipaski. Arupax, jach'a qillqanakas, jichhakamax kastill arunkiwa."}
@@ -1112,6 +1113,7 @@ function elegirIdioma(l) { lang = l; try { localStorage.setItem("idioma", l); lo
 // ---------- Traducción COMPLETA a quechua (Collao) y aimara — BORRADOR para revisión con hablantes de Moquegua ----------
 // Funciona oración por oración: lo que se ve en pantalla y lo que dice el agricultor. Lo que no está aquí queda en castellano.
 const TR = {
+ "Más calor de lo normal": ["Sapa kutinmanta aswan q'uñi", "Sapa kutit sipans juk'amp junt'u"], "Más frío de lo normal": ["Sapa kutinmanta aswan chiri", "Sapa kutit sipans juk'amp thaya"], "Como siempre": ["Sapa kutin hina", "Sapa kutjama"],
  "Nuestro reto de la NASA": ["NASA nisqapa atipanakuyniyku", "NASA ukan atipt'äwisa"],
  "Hoy": ["Kunan", "Jichhüru"], "Próximo mes": ["Hamuq killa", "Jutir phaxsi"], "Ahora": ["Kunan", "Jichhaxa"],
  "Yachachiq le ayuda a planificar su chacra con 45 años de datos de la NASA.": ["Yachachiqqa chakraykita wakichinaykipaq yanapasunki, NASA nisqapa 45 wata willakuyninkunawan.", "Yachachiqax yapuma wakichañatakiw yanapt'ätam, NASA ukan 45 mara yatiyawinakapampi."],
@@ -1124,8 +1126,8 @@ const TR = {
  "Idioma": ["Simi", "Aru"], "Hoy en su zona": ["Kunan llaqtaykipi", "Jichhürux markamana"], "Usted está aquí": ["Kaypi kachkanki", "Akankasktawa"],
  "Lluvia este mes": ["Kay killapi para", "Aka phaxsin jallu"], "Temperatura este mes": ["Kay killapi q'uñi chiri", "Aka phaxsin junt'u thaya"],
  "Heladas este mes": ["Kay killapi qasakuna", "Aka phaxsin juyphinaka"], "Verano 2027": ["Puquy pacha 2027", "Jallu pacha 2027"],
- "Comparado con los años 80": ["1980 watakunawan tupachisqa", "1980 maranakamp chikachata"],
- "Hace más calor que en los años 80": ["1980 watakunamanta aswan ruphay", "1980 maranakat juk'amp junt'u"], "Casi igual que en los años 80": ["1980 watakuna hinallataq", "1980 maranakjamaki"],
+ "¿Hace más calor que antes?": ["¿Ñawpaqmanta aswan q'uñichu?", "¿Nayrat sipans juk'amp junt'uti?"],
+ "Sí: hoy hace más calor que hace 40 años": ["Arí: kunanqa 40 wata ñawpaqmanta aswan q'uñi", "Jisa: jichhax 40 mara nayrat sipans juk'amp junt'u"], "No: el calor es casi igual que hace 40 años": ["Manam: 40 wata ñawpaq hinallataq", "Janiw: 40 mara nayrjamakiwa"],
  "Más calor que antes": ["Ñawpaqmanta aswan ruphay", "Nayrat sipans juk'amp junt'u"], "Casi igual que antes": ["Ñawpaq hinallataq", "Nayra pachjamaki"],
  "Mucha lluvia": ["Ancha para", "Walja jallu"], "Poca lluvia": ["Pisi para", "Juk'a jallu"], "Normal": ["Sapa kutin hina", "Walikiwa"], "Incierto": ["Mana yachakunchu", "Janiw yatiskiti"],
  "Mucho calor": ["Ancha ruphay", "Wali junt'u"], "Sin heladas": ["Mana qasa kanchu", "Janiw juyphïkiti"], "Quizás poca lluvia": ["Pisi parachá", "Inas juk'a jallu"], "No será lluvioso": ["Mana ancha parachu", "Janiw walja jallukaniti"],
@@ -1257,6 +1259,13 @@ const TR = {
 };
 // Oraciones con números (plantillas)
 const TRP = [
+ [/^Temperatura del aire de todo el año, comparada con los años 80: ([+\-−]?[\d.,]+) °C\.$/, ["Llapan watapa wayra q'uñin, 1980 watakunawan tupachisqa: $1 °C.", "Taqi marana thaya junt'upa, 1980 maranakamp chikachata: $1 °C."]],
+ [/^En (\S+) casi no llueve$/, ["$1 killapi yaqa manam paranchu", "$1 phaxsinx niya janiw jallux purkiti"]],
+ [/^En (\S+) llueve poco$/, ["$1 killapi pisillata paran", "$1 phaxsinx juk'akiw jallux puri"]],
+ [/^(\S+) es un mes de lluvias$/, ["$1 killaqa para killam", "$1 phaxsix jallu phaxsiwa"]],
+ [/^En (\S+) casi no llueve\.$/, ["$1 killapi yaqa manam paranchu.", "$1 phaxsinx niya janiw jallux purkiti."]],
+ [/^En (\S+) llueve poco\.$/, ["$1 killapi pisillata paran.", "$1 phaxsinx juk'akiw jallux puri."]],
+ [/^(\S+) es un mes de lluvias\.$/, ["$1 killaqa para killam.", "$1 phaxsix jallu phaxsiwa."]],
  [/^Paso 2: ¿qué viene en (\S+)\?$/, ["2 ruway: ¿$1 killapi imataq hamunqa?", "2 lurawi: ¿$1 phaxsinx kunas jutani?"]],
  [/^Pronóstico para (\S+)$/, ["$1 killapaq willakuy", "$1 phaxsitak yatiyawi"]],
  [/^Prepárese para (\S+)$/, ["$1 killapaq wakichikuy", "$1 phaxsitak wakichasim"]],
@@ -1347,7 +1356,7 @@ const ZN = {"Costa (Ilo)":"Coast (Ilo)","Desierto intermedio (Moquegua bajo)":"M
   "Sierra media (Carumas-Torata)":"Mid highlands (Carumas-Torata)","Zona alta norte (Ichuña)":"Northern highlands (Ichuña)","Altiplano (represa Pasto Grande)":"High plateau (Pasto Grande dam)"};
 const L = {
  es:{menu:[["casa","Hoy"],["calendario","Próximo mes"],["brote","Mis cultivos"],["info","Información"]],
-  hoy:"Hoy en su zona", hel:"Heladas este mes", hNo:"Sin heladas", hPocas:n=>`${n} heladas`, hNota:(n)=>`Lo normal: unas ${n} noches. Dato provisional.`, saludo:"¡Hola! Tóqueme y le cuento.", lluvia:"Lluvia este mes", temp:"Temperatura este mes", verano:v=>`Verano ${v}`,
+  hoy:"Hoy en su zona", hel:"Heladas este mes", hNo:"Sin heladas", hPocas:n=>`${n} heladas`, hNota:(n)=>`Lo normal: unas ${n} noches.`, saludo:"¡Hola! Tóqueme y le cuento.", lluvia:"Lluvia este mes", temp:"Temperatura este mes", verano:v=>`Verano ${v}`,
   lNormal:"Normal", lMucha:"Mucha lluvia", lPoca:"Poca lluvia", lDuda:"Sin dato seguro",
   cMucho:"Mucho calor", cMas:"Más calor", cNormal:"Normal", cFrio:"Más frío",
   vPoca:"Poca lluvia", vQuiza:"Quizás poca lluvia", vNoMucha:"No será lluvioso", vIncierto:"Incierto",
@@ -1358,7 +1367,8 @@ const L = {
   dD:{mas:"Hoy hace más calor que en los años 80.", igual:"La temperatura está casi igual que en los años 80."},
   bL:{normal:"¡Riegue como siempre!", mucha:"¡Revise sus acequias!", poca:"¡Cuide el agua!", gris:"Dato no seguro"}, bT:{mucho:"¡Cuide su piel del sol!", mas:"¡Riegue temprano!", normal:"Todo normal", frio:"¡Abríguese!"}, bV:{seco:"¡Guarde agua!", incierto:"¡Esté preparado!"}, bD:{mas:"Más calor que antes", igual:"Casi igual que antes"}, aAcequias:"Revise sus acequias", aNormal:"Riegue como siempre", aPrep:"Esté preparado",
   recuerdo:a=>`Este año se parece a ${a}.`, nota:{media:n=>`Acierta ${n} de cada 10 veces.`, debil:"Aviso poco seguro.", ninguna:"Según los veranos más parecidos."},
-  desde:x=>`Desde 1981 su zona se calentó ${x} °C`, antes:"Comparado con los años 80", masCalor80:"Hace más calor que en los años 80", igual80:"Casi igual que en los años 80", mapa:"Mapa de las zonas", aqui:"Usted está aquí",
+  desde:x=>`Desde 1981 su zona se calentó ${x} °C`, antes:"¿Hace más calor que antes?", masCalor80:"Sí: hoy hace más calor que hace 40 años", igual80:"No: el calor es casi igual que hace 40 años",
+  notaCalor:x=>`Temperatura del aire de todo el año, comparada con los años 80: ${x} °C.`, mapa:"Mapa de las zonas", aqui:"Usted está aquí",
   proxMes:"El próximo mes", meses:["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
   mc:["E","F","M","A","M","J","J","A","S","O","N","D"],
   hara:"Hará en promedio", entre:(a,b)=>`entre ${a} y ${b} °C`, lonormal:"Lo normal", porNino:"Por El Niño",
@@ -1366,6 +1376,8 @@ const L = {
   obj:"Yachachiq le ayuda a planificar su chacra con 45 años de datos de la NASA.", pasos:["Hoy","Próximo mes","Mis cultivos"],
   hoySub:"Lo que pasó en los últimos 30 días", irMes:m=>`Paso 2: ¿qué viene en ${m}?`, irCult:"Paso 3: ¿qué hago con mis cultivos?",
   prono:m=>`Pronóstico para ${m}`, pronoSub:"Esto es lo que viene el próximo mes. No es el clima de hoy.", prepM:m=>`Prepárese para ${m}`,
+  mesMas:"Más calor de lo normal", mesFrio:"Más frío de lo normal", mesIgual:"Como siempre",
+  llPal:(m,k)=>[`En ${m} casi no llueve`, `En ${m} llueve poco`, `${m[0].toUpperCase() + m.slice(1)} es un mes de lluvias`][k],
   llNormMes:m=>`Lluvia normal en ${m}`, llNormV:(m,x)=>x < 3 ? `Casi no llueve en ${m}` : `Suele llover unos ${x} mm en ${m}`, verTit:v=>`Verano ${v} (diciembre a marzo)`,
   cultivo:"Pronto: elija su cultivo y le diremos cómo le afecta el clima.", mesNota:"Error típico: ±0,5 °C.",
   qEs:"¿Qué es Yachachiq?", qEsT:"Una app <b>gratis</b> que le dice cómo está la lluvia y el calor en su zona, y qué esperar. Usa 45 años de datos de la NASA, de satélites y modelos del clima. El nombre viene del quechua: un <b>yachachiq</b> es «el que sabe y enseña lo que sabe».",
@@ -1375,7 +1387,7 @@ const L = {
   tec:"Para revisores: detalle técnico y pruebas del modelo", noUbic:"No se pudo ubicar. Elija su zona en la lista.",
   prep:"Traducción en preparación con hablantes nativos de Moquegua. Por ahora, en español."},
  en:{menu:[["casa","Today"],["calendario","Next month"],["brote","My crops"],["info","Information"]],
-  hoy:"Today in your area", hel:"Frost this month", hNo:"No frost", hPocas:n=>`${n} frost nights`, hNota:(n)=>`Normal: about ${n} nights. Provisional data.`, saludo:"Hello! Tap me and I will tell you.", lluvia:"Rain this month", temp:"Temperature this month", verano:v=>`Summer ${v}`,
+  hoy:"Today in your area", hel:"Frost this month", hNo:"No frost", hPocas:n=>`${n} frost nights`, hNota:(n)=>`Normal: about ${n} nights.`, saludo:"Hello! Tap me and I will tell you.", lluvia:"Rain this month", temp:"Temperature this month", verano:v=>`Summer ${v}`,
   lNormal:"Normal", lMucha:"A lot of rain", lPoca:"Little rain", lDuda:"No reliable data",
   cMucho:"Much hotter", cMas:"Hotter", cNormal:"Normal", cFrio:"Colder",
   vPoca:"Little rain", vQuiza:"Maybe little rain", vNoMucha:"Not a rainy one", vIncierto:"Uncertain",
@@ -1386,13 +1398,16 @@ const L = {
   dD:{mas:"Today it is hotter than in the 1980s.", igual:"Temperature is about the same as in the 1980s."},
   bL:{normal:"Irrigate as usual!", mucha:"Check your ditches!", poca:"Save water!", gris:"Data not reliable"}, bT:{mucho:"Protect your skin!", mas:"Irrigate early!", normal:"All normal", frio:"Keep warm!"}, bV:{seco:"Store water!", incierto:"Be prepared!"}, bD:{mas:"Hotter than before", igual:"About the same"}, aAcequias:"Check your ditches", aNormal:"Irrigate as usual", aPrep:"Be prepared",
   recuerdo:a=>`This year looks like ${a}.`, nota:{media:n=>`Right ${n} times out of 10.`, debil:"Weak signal.", ninguna:"Based on the most similar summers."},
-  desde:x=>`Since 1981 your area has warmed ${x} °C`, antes:"Compared with the 1980s", masCalor80:"Hotter than in the 1980s", igual80:"About the same as in the 1980s", mapa:"Map of the areas", aqui:"You are here",
+  desde:x=>`Since 1981 your area has warmed ${x} °C`, antes:"Is it hotter than before?", masCalor80:"Yes: it is hotter than 40 years ago", igual80:"No: about as hot as 40 years ago",
+  notaCalor:x=>`Air temperature over the whole year, compared with the 1980s: ${x} °C.`, mapa:"Map of the areas", aqui:"You are here",
   proxMes:"Next month", meses:["January","February","March","April","May","June","July","August","September","October","November","December"],
   mc:["J","F","M","A","M","J","J","A","S","O","N","D"],
   hara:"Expected average", entre:(a,b)=>`between ${a} and ${b} °C`, lonormal:"Normal", porNino:"Due to El Niño",
   obj:"Yachachiq helps you plan your farm with 45 years of NASA data.", pasos:["Today","Next month","My crops"],
   hoySub:"What happened in the last 30 days", irMes:m=>`Step 2: what is coming in ${m}?`, irCult:"Step 3: what do I do with my crops?",
   prono:m=>`Forecast for ${m}`, pronoSub:"This is what is coming next month. It is not today's weather.", prepM:m=>`Get ready for ${m}`,
+  mesMas:"Warmer than normal", mesFrio:"Colder than normal", mesIgual:"As usual",
+  llPal:(m,k)=>[`It hardly rains in ${m}`, `It rains a little in ${m}`, `${m} is a rainy month`][k],
   llNormMes:m=>`Normal rain in ${m}`, llNormV:(m,x)=>x < 3 ? `It hardly rains in ${m}` : `It usually rains about ${x} mm in ${m}`, verTit:v=>`Summer ${v} (December to March)`,
   hacer:"What to do these days", cuando:"When does it rain in your area?", cuandoNota:"Bars: normal rain each month. In yellow, next month.",
   cultivo:"Coming soon: choose your crop and we will tell you how the weather affects it.", mesNota:"Typical error: ±0.5 °C.",
@@ -1826,7 +1841,7 @@ function pintar() {
       ${semaforo("s1", t.lluvia, mL)}
       ${mH ? semaforo("s2", t.hel, mH, t.hNota(Z.heladas.normal_mediana)) : semaforo("s2", t.temp, mT)}
       <button class="sem ancho" data-voz="desde"><div class="luz" style="border-color:${subio >= .5 ? HEX.rojo : HEX.verde}">${ico("arena", 40)}</div>
-        <div><div class="t">${t.antes}</div><div class="v">${subio >= .5 ? t.masCalor80 : t.igual80}</div><div class="nota">${sg(subio)} °C (1981-2025)</div></div><span class="vz">${ico("parlante", 34)}</span></button>
+        <div><div class="t">${t.antes}</div><div class="v">${subio >= .5 ? t.masCalor80 : t.igual80}</div><div class="nota">${t.notaCalor(sg(subio))}</div></div><span class="vz">${ico("parlante", 34)}</span></button>
     </div><div><div id="mapa" aria-label="${t.mapa}"></div></div></div>
     ${avIdi ? `<div class="soloMovil">${avIdi}</div>` : ""}
     ${irBtn("chacra", t.irMes(mesN))}
@@ -1852,20 +1867,18 @@ function pintar() {
   const tareas = keys.map(k => G[k].t);
   voz.mes = ln() === "en" ? {d:`In ${mesN} it will be about ${fmt(pm.temp_esperada, 0)} degrees, ${dif > .5 ? "warmer than normal" : "as usual"}.`, b:`${fmt(pm.temp_esperada, 0)} °C`}
                           : {d:`En ${mesN} hará unos ${fmt(pm.temp_esperada, 0)} grados, ${dif > .5 ? "más calor de lo normal" : "como siempre"}.`, b:`${fmt(pm.temp_esperada, 0)} °C`};
-  voz.llmes = {d:t.llNormV(mesN, Math.round(llSig)) + ".", b:t.llNormMes(mesN)};
+  voz.llmes = {d:t.llPal(mesN, llSig < 3 ? 0 : mesLluvioso ? 2 : 1) + ".", b:t.llNormMes(mesN)};
   voz.tareas = {d:tareas.join(". ") + ".", b:tareas[0]};
   document.getElementById("chacra").innerHTML = `${pasosHTML(2)}
     <div class="pronoBan">${ico("calendario", 54)}<div><div class="pt">${t.prono(mesN)}</div><div class="ps">${t.pronoSub}</div></div></div>
     <div class="col2"><div>
     <div class="grande" data-voz="mes"><span class="etq">${t.proxMes}</span>
       <div class="sub">${t.hara}</div>
-      <div class="num">${ico("termometro", 52)} ${fmt(pm.temp_esperada)} °C</div>
-      <div class="sub">${t.entre(fmt(pm.temp_min), fmt(pm.temp_max))}</div>
-      <div class="chips"><div>${t.lonormal}<b>${fmt(pm.normal)} °C</b></div><div>${t.porNino}<b>${sg(pm.temp_esperada - pm.normal)} °C</b></div></div>
-      <div class="nota">${t.mesNota}</div>
+      <div class="num">${ico("termometro", 52)} ${fmt(pm.temp_esperada, 0)} °C</div>
+      <div class="v2">${dif > .5 ? t.mesMas : dif < -.5 ? t.mesFrio : t.mesIgual}</div>
     </div>
     <button class="sem" data-voz="llmes"><div class="luz" style="border-color:${HEX.azul}">${ico("gota", 40)}</div>
-      <div><div class="t">${t.llNormMes(mesN)}</div><div class="v">${t.llNormV(mesN, Math.round(llSig))}</div></div><span class="vz">${ico("parlante", 34)}</span></button>
+      <div><div class="t">${t.llNormMes(mesN)}</div><div class="v">${t.llPal(mesN, llSig < 3 ? 0 : mesLluvioso ? 2 : 1)}</div></div><span class="vz">${ico("parlante", 34)}</span></button>
     ${semaforo("s3", t.verTit(v.verano), mV, t.recuerdo(yRec))}
     </div><div>
     <h2>${t.prepM(mesN)}</h2>
