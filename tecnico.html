@@ -38,10 +38,11 @@
  <li><b>In each farmer's phone, once a day:</b> the app downloads the NASA POWER daily series 1981-today for the area (T2M, T2M_MAX, T2M_MIN, PRECTOTCORR) and recomputes "Today in your area": temperature and frost nights of the last 30 days against the same dates of every year, and the fact of the day. Only the results are stored on the phone.</li>
  <li><b>The next-month temperature model is retrained every day</b> in the phone with every complete month up to today (same regression as the notebook: month + trend + ONI; about 550 months). Checked against the notebook: Coast, December 2026 → 21.2 °C (notebook 21.1 °C).</li>
  <li><b>A GitHub Actions robot</b> (<code>.github/workflows/actualizar_datos.yml</code>) downloads the NOAA ONI every morning into <code>oni.json</code>, because NOAA does not allow direct download from a web page.</li>
- <li><b>Rain:</b> POWER's last days are provisional and sometimes far too high. If the live value is flagged as doubtful (more than 3× the 95th percentile and above 30 mm), the app shows the latest GPM IMERG check (Giovanni) if it is less than 45 days old; otherwise it says it is not sure.</li>
+ <li><b>Rain from the GPM IMERG satellite, every day:</b> the same robot downloads NASA GPM IMERG Late daily rain (GPM_3IMERGDL.07, GES DISC OPeNDAP, with the team's Earthdata token stored as a GitHub secret) for the 6 areas, keeps the daily series since 2001 in <code>imerg_diario.json</code> and writes <code>imerg.json</code>: rain of the last 30 days and its percentiles on the same dates of every year. The app uses it for "Rain this month" when it is less than 10 days old.</li>
+ <li><b>Backup:</b> if IMERG is not available, the app uses POWER rain; POWER's last days are provisional and sometimes far too high, so a doubtful value (more than 3× the 95th percentile and above 30 mm) is replaced by the latest IMERG check if it is less than 45 days old; otherwise the app says it is not sure.</li>
  <li>The summer 2027 forecast and the 2027-2037 projection are seasonal products: they are recomputed with the notebook once per season, not daily.</li>
 </ul>
-<p class="es">Cada día, en el celular: se bajan los datos diarios de NASA POWER, se recalcula "Hoy en su zona" y se re-entrena el modelo de temperatura del próximo mes. Un robot de GitHub actualiza el índice de El Niño (ONI) cada mañana.</p>
+<p class="es">Cada día, en el celular: se bajan los datos diarios de NASA POWER, se recalcula "Hoy en su zona" y se re-entrena el modelo de temperatura del próximo mes. Un robot de GitHub actualiza cada mañana el índice de El Niño (ONI) y la lluvia del satélite GPM IMERG.</p>
 
 <h2>2. Trends 1981-2025 <span class="es">/ Tendencias</span></h2>
 <p>Area / Zona: <select id="zona"></select></p>

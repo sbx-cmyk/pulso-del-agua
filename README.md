@@ -17,4 +17,4 @@ Use of AI: code, icons, illustrations (marked "AI" in the app) and the Yachachiq
 ## Se actualiza solo cada día
 - En el celular de cada agricultor, una vez al día, la app baja los datos diarios de NASA POWER (1981 hasta hoy), recalcula "Hoy en su zona" (temperatura y heladas de los últimos 30 días frente a 45 años) y **re-entrena el modelo de temperatura del próximo mes** (mes + tendencia + El Niño).
 - Un robot de GitHub Actions (`.github/workflows/actualizar_datos.yml`) baja cada mañana el índice de El Niño (ONI) de NOAA a `oni.json`.
-- Si la lluvia provisional de POWER sale dudosa, se usa la última comprobación con el satélite GPM IMERG (Giovanni).
+- El mismo robot baja cada día la lluvia del satélite **GPM IMERG** de la NASA (con el token de Earthdata guardado como secreto `EARTHDATA_TOKEN`) a `imerg.json`; la app la usa en "Lluvia este mes". Si no está, usa POWER con su control de dato dudoso.

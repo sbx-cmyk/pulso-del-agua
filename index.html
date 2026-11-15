@@ -816,7 +816,7 @@ function escenaCultivo(k, est) {
 // Con esos datos se recalcula cada día: el dato del día, "Hoy en su zona" (lluvia, temperatura y heladas
 // de los últimos 30 días frente a 45 años) y se RE-ENTRENA el modelo de temperatura del próximo mes
 // (mes del año + tendencia + El Niño/ONI). El ONI lo actualiza cada día un robot de GitHub (oni.json).
-const VIVO = {}, VIVO_VER = 3;
+const VIVO = {}, VIVO_VER = 4;
 const fk = dt => `${dt.getFullYear()}${String(dt.getMonth() + 1).padStart(2, "0")}${String(dt.getDate()).padStart(2, "0")}`;
 const okV = v => v !== undefined && v !== null && v > -990;
 const hoyLocal = () => fk(new Date());
@@ -831,6 +831,26 @@ async function bajarONI() {
   if (ONI) return ONI;
   try { const j = await (await fetch("oni.json?d=" + hoyLocal(), {cache: "no-store"})).json(); if (j.oni && j.oni.length > 400) ONI = j; } catch (e) {}
   return ONI;
+}
+// Lluvia del satélite GPM IMERG: la baja cada día el robot de GitHub (imerg.json)
+let IMERG = null;
+async function bajarIMERG() {
+  if (IMERG) return IMERG;
+  try { const j = await (await fetch("imerg.json?d=" + hoyLocal(), {cache: "no-store"})).json(); if (j.zonas) IMERG = j; } catch (e) {}
+  return IMERG;
+}
+function lluviaIMERG(z, J) {
+  const x = J && J.zonas && J.zonas[z]; if (!x) return null;
+  if ((new Date() - new Date(J.hasta)) / 864e5 > 10) return null;   // muy viejo: no se usa
+  const ll = x.ll; let color, lado;
+  if (ll > 3 * x.p95 && ll > 30) [color, lado] = ["gris", "dato dudoso"];
+  else if (x.p67 < 10) [color, lado] = ["verde", "seco habitual"];
+  else if (ll < x.p10) [color, lado] = ["rojo", "seco"];
+  else if (ll < x.p33) [color, lado] = ["amarillo", "seco"];
+  else if (ll > x.p90) [color, lado] = ["rojo", "lluvioso"];
+  else if (ll > x.p67) [color, lado] = ["amarillo", "lluvioso"];
+  else [color, lado] = ["verde", "normal"];
+  return {lluvia_30_dias_mm: ll, lluvia_normal_mm: x.p50, limite_seco_mm: x.p33, limite_lluvioso_mm: x.p67, color, lado, fuente_lluvia: "IMERG", lluvia_hasta: J.hasta};
 }
 const cuantil = (a, p) => { const s = [...a].sort((x, y) => x - y), i = (s.length - 1) * p, f = Math.floor(i); return s[f] + (s[Math.min(f + 1, s.length - 1)] - s[f]) * (i - f); };
 const prom = a => a.reduce((s, x) => s + x, 0) / a.length;
@@ -963,7 +983,8 @@ function aplicarVivo(z) {
   if (R.hoy && R.hoy.hoy) {
     const h = Object.assign({}, R.hoy.hoy), b = BASE_HOY[z];
     const edad = b && b.hasta ? (new Date() - new Date(b.hasta)) / 864e5 : 999;
-    if (h.color === "gris" && b && b.fuente_lluvia === "IMERG" && edad < 45) {
+    if (R.imerg) Object.assign(h, R.imerg);   // 1.º: satélite GPM IMERG del robot (lo más confiable)
+    else if (h.color === "gris" && b && b.fuente_lluvia === "IMERG" && edad < 45) {
       ["lluvia_30_dias_mm", "lluvia_normal_mm", "limite_seco_mm", "limite_lluvioso_mm", "color", "lado", "fuente_lluvia"].forEach(k => h[k] = b[k]);
       h.lluvia_hasta = b.hasta;
     }
@@ -976,8 +997,8 @@ function vivoGuardado(z) {
   return null;
 }
 async function calcularVivo(z) {
-  const [P, oni] = await Promise.all([bajarPower(D.zona[z]), bajarONI()]);
-  const R = {dia: hoyLocal(), ver: VIVO_VER, stats: statsVivo(P), hoy: hoyVivo(P), modelo: modeloVivo(P, oni)};
+  const [P, oni, im] = await Promise.all([bajarPower(D.zona[z]), bajarONI(), bajarIMERG()]);
+  const R = {dia: hoyLocal(), ver: VIVO_VER, stats: statsVivo(P), hoy: hoyVivo(P), modelo: modeloVivo(P, oni), imerg: lluviaIMERG(z, im)};
   try { localStorage.setItem("vivo_" + z, JSON.stringify(R)); } catch (e) {}
   return R;
 }
