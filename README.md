@@ -1,4 +1,6 @@
-# Pulso del Agua · Moquegua
+# Yachachiq · Moquegua
+
+*Yachachiq* is Quechua for "the one who knows and teaches what they know" (formerly "Pulso del Agua").
 
 App gratuita para agricultores de Moquegua (Perú): les dice cómo está la lluvia y el calor en su zona y qué hacer en su chacra. Tiene íconos grandes, voz y cuatro idiomas: castellano, inglés, quechua y aimara (estos dos últimos son un borrador en revisión).
 
