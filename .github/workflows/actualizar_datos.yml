@@ -1,0 +1,27 @@
+# Robot diario de Yachachiq: baja el indice de El Nino (ONI) de NOAA para que la app
+# re-entrene su modelo de temperatura con el dato mas nuevo. Los datos diarios de la NASA
+# (POWER) los baja la propia app en el celular de cada agricultor.
+name: Actualizar datos (ONI)
+on:
+  schedule:
+    - cron: "17 11 * * *"   # todos los dias, 6:17 a. m. hora de Peru
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  oni:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/actualizar_oni.py
+      - name: Guardar si cambio
+        run: |
+          if git diff --quiet oni.json; then echo "Sin cambios"; exit 0; fi
+          git config user.name "yachachiq-robot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add oni.json
+          git commit -m "Datos: ONI actualizado $(date -u +%F)"
+          git push
