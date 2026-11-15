@@ -9,3 +9,5 @@ NASA Space Apps Challenge 2026, reto "Be An Earth System Trend Detective!". Equi
 - Voces grabadas: carpeta `voz/`
 
 Datos: NASA POWER (MERRA-2), NASA GPM IMERG (vía Giovanni), índices de El Niño de NOAA CPC. Mapa: © colaboradores de OpenStreetMap.
+
+Use of AI: code, icons and illustrations were written with the help of an AI assistant (Claude) and reviewed by Team TROYA. The recorded voices in `voz/` were generated with AI text-to-speech (ElevenLabs and LuvVoice). Quechua and Aymara texts are AI-assisted drafts pending review by native speakers.

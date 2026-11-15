@@ -332,6 +332,19 @@
     .nota,.cult .ck,.chip{font-size:1rem}
   }
   @media (max-width:360px){ .menu button{font-size:.8rem} .mesc .nm{font-size:.9rem} .tiles .sem .t{font-size:.98rem} }
+
+  /* --- Celular: los 4 cuadros se ven completos apenas se entra; el mapa no se monta sobre el menú --- */
+  .soloMovil{display:none}
+  #mapa{position:relative;z-index:0;isolation:isolate}
+  @media (max-width:800px){
+    .soloPC{display:none} .soloMovil{display:block;margin-top:14px}
+    #inicio > h2{margin:10px 2px 8px}
+    .tiles{gap:8px}
+    .tiles .sem{min-height:0!important;padding:10px 10px 12px!important;gap:3px!important}
+    .tiles .luz{width:44px!important;height:44px!important;border-width:5px!important} .tiles .luz .ico{width:26px!important;height:26px!important}
+    .tiles .sem .vz{top:8px!important;right:8px!important} .tiles .sem .vz .ico{width:28px;height:28px}
+    .tiles .sem .t{font-size:.9rem!important;line-height:1.2} .tiles .sem .v{font-size:1.25rem!important;line-height:1.15} .tiles .sem .a{font-size:.95rem!important;line-height:1.2}
+  }
 </style>
 </head>
 <body>
@@ -960,6 +973,7 @@ const TR = {
  "Este equipo no puede dar su ubicación.": ["Kay equipoqa mana maypi kasqaykita willayta atinchu.", "Aka equipox janiw kawkinkatas yatiyañ atkiti."],
  "No se pudo ubicar.": ["Mana tarikurqanchu maypi kasqayki.", "Janiw kawkinkatasa jikxatkiti."], "Elija su zona en la lista.": ["Llaqtaykita listapi akllay.", "Markama listan ajllim."],
  "Cuidado": ["Cuidakuy", "Arxatasim"], "Atento": ["Qhawakuy", "Amuyasim"],
+ "Las voces grabadas se generaron con IA (ElevenLabs y LuvVoice).": ["Grabasqa kunkakunaqa IA-wan ruwasqa (ElevenLabs, LuvVoice).", "Grabat arunakax IA-mpi lurataw (ElevenLabs, LuvVoice)."],
  "Datos:": ["Willakuykuna:", "Yatiyawinaka:"], "Mapa: © colaboradores de OpenStreetMap.": ["Mapa: © OpenStreetMap yanapaqkuna.", "Mapa: © OpenStreetMap yanapirinaka."],
  "Código, íconos e ilustraciones hechos con ayuda de un asistente de IA (Claude) y revisados por el equipo TROYA.": ["Código, íconokuna, siq'ikunapas IA yanapaqwan (Claude) ruwasqa, TROYA huñuwan qhawasqa.", "Código, ícononaka, dibujonakasa IA yanapiri (Claude) ukamp lurata, TROYA tamamp uñakipata."],
  "De la FAO (protección contra heladas), el MINSA y el SENAMHI (sol y frío), el MIDAGRI y el Fondo Sierra Azul (qochas, cobertizos), la Autoridad Nacional del Agua (canales) e investigaciones universitarias de cada cultivo.": ["FAO (qasamanta amachakuy), MINSA, SENAMHI (inti, chiri), MIDAGRI, Fondo Sierra Azul (quchakuna, cobertizokuna), Autoridad Nacional del Agua (yarqhakuna), universidadkunapa sapa tarpuymanta yachaykunanpas.", "FAO (juyphit jark'aqasiña), MINSA, SENAMHI (inti, thaya), MIDAGRI, Fondo Sierra Azul (qutanaka, cobertizonaka), Autoridad Nacional del Agua (larq'anaka), universidadanakan sapa satanakat yatxatawinakapasa."],
@@ -1576,7 +1590,8 @@ function pintar() {
   const ids = ["inicio", "chacra", "cultivos", "info"];
   document.getElementById("menu").innerHTML = t.menu.map((m, i) => `<button data-s="${ids[i]}" class="${ids[i] === seccion ? "on" : ""}">${ico(m[0], 34)}${m[1]}</button>`).join("");
   document.querySelectorAll("#menu button").forEach(b => b.onclick = () => irA(b.dataset.s));
-  document.getElementById("avisoIdioma").innerHTML = (lang === "qu" || lang === "ay") ? `<div class="aviso"><span class="icIdi"></span> ${QA[lang].prep}</div>` : preguntaIdioma(sel.value);
+  const avIdi = (lang === "qu" || lang === "ay") ? `<div class="aviso"><span class="icIdi"></span> ${QA[lang].prep}</div>` : preguntaIdioma(sel.value);
+  document.getElementById("avisoIdioma").innerHTML = avIdi ? `<div class="soloPC">${avIdi}</div>` : "";
   document.querySelectorAll(".icIdi").forEach(e => e.innerHTML = ico("idioma", 30));
 
   const z = sel.value, Z = D.zona[z], a = Z.hoy, v = Z.verano, pm = Z.proximo[0];
@@ -1600,6 +1615,7 @@ function pintar() {
       <button class="sem" data-voz="desde"><div class="luz" style="border-color:${subio >= .5 ? HEX.rojo : HEX.verde}">${ico("arena", 40)}</div>
         <div><div class="t">${t.antes}</div><div class="v">${subio >= .5 ? t.masCalor80 : t.igual80}</div><div class="nota">${sg(subio)} °C (1981-2025)</div></div><span class="vz">${ico("parlante", 34)}</span></button>
     </div><div><div id="mapa" aria-label="${t.mapa}"></div></div></div>
+    ${avIdi ? `<div class="soloMovil">${avIdi}</div>` : ""}
     <div class="saber dato" id="datoDia">${datoHTML()}</div>
     <button class="btnSaberes enInicio" onclick="contarSaber()"><span class="icSab"></span><span class="txSab"></span></button>
     <a class="senamhi" href="https://www.senamhi.gob.pe/?p=pronostico-meteorologico" target="_blank" rel="noopener">${ico("nube", 44)}
@@ -1655,8 +1671,8 @@ function pintar() {
       ? "From FAO (frost protection), MINSA and SENAMHI (sun and cold), MIDAGRI and Fondo Sierra Azul (qochas, shelters), the National Water Authority (canals) and university research on each crop. The full list is on the technical page."
       : "De la FAO (protección contra heladas), el MINSA y el SENAMHI (sol y frío), el MIDAGRI y el Fondo Sierra Azul (qochas, cobertizos), la Autoridad Nacional del Agua (canales) e investigaciones universitarias de cada cultivo. La lista completa está en la página técnica."}</p></div></div>
     <p style="margin:18px 4px">${ico("lupa", 26)} <a href="tecnico.html">${t.tec}</a></p>
-    <footer>${ln() === "en" ? "Data: NASA POWER (MERRA-2), NASA GPM IMERG (via Giovanni), NOAA CPC El Niño indices. Map: © OpenStreetMap contributors. Code, icons and illustrations written with the help of an AI assistant (Claude) and reviewed by Team TROYA. Not an official forecasting service."
-      : "Datos: NASA POWER (MERRA-2), NASA GPM IMERG (vía Giovanni), índices de El Niño de NOAA CPC. Mapa: © colaboradores de OpenStreetMap. Código, íconos e ilustraciones hechos con ayuda de un asistente de IA (Claude) y revisados por el equipo TROYA. No es un servicio oficial de pronóstico."}</footer>`;
+    <footer>${ln() === "en" ? "Data: NASA POWER (MERRA-2), NASA GPM IMERG (via Giovanni), NOAA CPC El Niño indices. Map: © OpenStreetMap contributors. Code, icons and illustrations written with the help of an AI assistant (Claude) and reviewed by Team TROYA. Recorded voices were generated with AI text-to-speech (ElevenLabs and LuvVoice). Not an official forecasting service."
+      : "Datos: NASA POWER (MERRA-2), NASA GPM IMERG (vía Giovanni), índices de El Niño de NOAA CPC. Mapa: © colaboradores de OpenStreetMap. Código, íconos e ilustraciones hechos con ayuda de un asistente de IA (Claude) y revisados por el equipo TROYA. Las voces grabadas se generaron con IA (ElevenLabs y LuvVoice). No es un servicio oficial de pronóstico."}</footer>`;
 
   dibujarMapa(z);
   activarTraduccion();   // quechua / aimara: traduce todo lo que quedó en castellano
