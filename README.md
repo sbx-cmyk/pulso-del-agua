@@ -12,4 +12,4 @@ NASA Space Apps Challenge 2026, reto "Be An Earth System Trend Detective!". Equi
 
 Datos: NASA POWER (MERRA-2), NASA GPM IMERG (vía Giovanni), índices de El Niño de NOAA CPC. Mapa: © colaboradores de OpenStreetMap.
 
-Use of AI: code, icons and illustrations were written with the help of an AI assistant (Claude) and reviewed by Team TROYA. The recorded voices in `voz/` were generated with AI text-to-speech (ElevenLabs and LuvVoice). Quechua and Aymara texts are AI-assisted drafts pending review by native speakers.
+Use of AI: code, icons, illustrations (marked "AI" in the app) and the Yachachiq and TROYA logos were made with the help of AI tools (Claude and others) and reviewed by Team TROYA. The demo video is AI-assisted and carries a visible AI watermark. The recorded voices in `voz/` were generated with AI text-to-speech (ElevenLabs and LuvVoice). Quechua and Aymara texts are AI-assisted drafts pending review by native speakers.
