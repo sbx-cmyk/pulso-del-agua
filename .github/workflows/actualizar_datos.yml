@@ -1,27 +1,41 @@
-# Robot diario de Yachachiq: baja el indice de El Nino (ONI) de NOAA para que la app
-# re-entrene su modelo de temperatura con el dato mas nuevo. Los datos diarios de la NASA
-# (POWER) los baja la propia app en el celular de cada agricultor.
-name: Actualizar datos (ONI)
+# Robot diario de Yachachiq:
+#  1) baja el indice de El Nino (ONI) de NOAA -> oni.json (para re-entrenar el modelo de temperatura)
+#  2) baja la lluvia del satelite GPM IMERG de la NASA -> imerg.json (para "Lluvia este mes")
+#     Usa el token de Earthdata guardado como secreto EARTHDATA_TOKEN (Settings > Secrets > Actions).
+# Los datos diarios de NASA POWER los baja la propia app en el celular de cada agricultor.
+name: Actualizar datos (ONI e IMERG)
 on:
   schedule:
     - cron: "17 11 * * *"   # todos los dias, 6:17 a. m. hora de Peru
   workflow_dispatch:
+    inputs:
+      dias:
+        description: "Dias de IMERG a bajar en esta corrida (la primera vez: 10000 para toda la historia)"
+        default: "400"
 permissions:
   contents: write
+concurrency: datos
 jobs:
-  oni:
+  datos:
     runs-on: ubuntu-latest
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python scripts/actualizar_oni.py
+      - name: ONI (NOAA)
+        run: python scripts/actualizar_oni.py
+      - name: Lluvia GPM IMERG (NASA)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          IMERG_DIAS: ${{ github.event.inputs.dias || '400' }}
+        run: python scripts/actualizar_imerg.py
       - name: Guardar si cambio
         run: |
-          if git diff --quiet oni.json; then echo "Sin cambios"; exit 0; fi
+          for f in oni.json imerg.json imerg_diario.json; do if [ -f "$f" ]; then git add "$f"; fi; done
+          if git diff --cached --quiet; then echo "Sin cambios"; exit 0; fi
           git config user.name "yachachiq-robot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add oni.json
-          git commit -m "Datos: ONI actualizado $(date -u +%F)"
+          git commit -m "Datos: ONI e IMERG actualizados $(date -u +%F)"
           git push
