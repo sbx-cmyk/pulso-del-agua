@@ -123,6 +123,8 @@
     .tituloM{margin-bottom:8px;line-height:2}
   }
   .leaflet-attribution-flag{display:none!important}
+  .leyMapa{background:#fffffff0;border-radius:12px;padding:5px 9px;font:700 13px Nunito,sans-serif;display:flex;gap:9px;box-shadow:0 1px 4px #0003}.leyMapa span{display:flex;align-items:center;gap:4px}.leyMapa i{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #0002}
+  #mapa .leaflet-container,#mapa.leaflet-container{touch-action:pan-y pinch-zoom!important}
   #btnUbic.buscando{animation:latido 1s ease-in-out infinite}@keyframes latido{50%{transform:scale(1.15);opacity:.6}}
   .leaflet-tooltip.aqui{background:#1f5a2e;color:#fff;border:0;font-size:14px;font-family:Nunito,sans-serif;padding:6px 12px;border-radius:14px}
   .leaflet-tooltip.aqui:before{border-top-color:#1f5a2e}
@@ -957,6 +959,7 @@ const TR = {
  "Parece que usted está lejos de Moquegua.": ["Moqueguamanta karupi kachkankichá.", "Moquegua markat jayankaspa."], "Elija su zona en la lista.": ["Llaqtaykita listapi akllay.", "Markama listan ajllim."],
  "Este equipo no puede dar su ubicación.": ["Kay equipoqa mana maypi kasqaykita willayta atinchu.", "Aka equipox janiw kawkinkatas yatiyañ atkiti."],
  "No se pudo ubicar.": ["Mana tarikurqanchu maypi kasqayki.", "Janiw kawkinkatasa jikxatkiti."], "Elija su zona en la lista.": ["Llaqtaykita listapi akllay.", "Markama listan ajllim."],
+ "Cuidado": ["Cuidakuy", "Arxatasim"], "Atento": ["Qhawakuy", "Amuyasim"],
  "Datos:": ["Willakuykuna:", "Yatiyawinaka:"], "Mapa: © colaboradores de OpenStreetMap.": ["Mapa: © OpenStreetMap yanapaqkuna.", "Mapa: © OpenStreetMap yanapirinaka."],
  "Código, íconos e ilustraciones hechos con ayuda de un asistente de IA (Claude) y revisados por el equipo TROYA.": ["Código, íconokuna, siq'ikunapas IA yanapaqwan (Claude) ruwasqa, TROYA huñuwan qhawasqa.", "Código, ícononaka, dibujonakasa IA yanapiri (Claude) ukamp lurata, TROYA tamamp uñakipata."],
  "De la FAO (protección contra heladas), el MINSA y el SENAMHI (sol y frío), el MIDAGRI y el Fondo Sierra Azul (qochas, cobertizos), la Autoridad Nacional del Agua (canales) e investigaciones universitarias de cada cultivo.": ["FAO (qasamanta amachakuy), MINSA, SENAMHI (inti, chiri), MIDAGRI, Fondo Sierra Azul (quchakuna, cobertizokuna), Autoridad Nacional del Agua (yarqhakuna), universidadkunapa sapa tarpuymanta yachaykunanpas.", "FAO (juyphit jark'aqasiña), MINSA, SENAMHI (inti, thaya), MIDAGRI, Fondo Sierra Azul (qutanaka, cobertizonaka), Autoridad Nacional del Agua (larq'anaka), universidadanakan sapa satanakat yatxatawinakapasa."],
@@ -1519,9 +1522,13 @@ const semaforo = (id, titulo, m, nota) => { voz[id] = {d:m.d || `${m.s}. ${m.a}.
     <span class="vz">${ico("parlante", 34)}</span></button>`; };
 
 // Mapa real (Leaflet + OpenStreetMap) si se puede; si no, esquema
+// Color de cada zona en el mapa: lo más serio entre lluvia, calor y heladas
+const ORDEN_C = {rojo:4, amarillo:3, azul:2, verde:1, gris:0};
+function estadoZona(z) { const Z = D.zona[z], mH = mHelada(Z.heladas), ms = [mLluvia(Z.hoy), mH || mTemp(Z.hoy)];
+  if (mH) ms.push(mH); let m = ms[0]; ms.forEach(x => { if (ORDEN_C[x.c] > ORDEN_C[m.c]) m = x; }); return m; }
 function mapaEsquema(zSel) {
   const W = 340, H = 300, x = lon => (lon + 71.6) / 1.5 * (W - 40) + 20, y = lat => (lat + 15.75) / -2.05 * (H - 50) + 45;
-  return `<svg viewBox="0 0 ${W} ${H}">${D.zonas.map(z => { const c = D.zona[z].coord, m = mLluvia(D.zona[z].hoy), X = x(c[1]), Y = y(c[0]), d = X > W * .55;
+  return `<svg viewBox="0 0 ${W} ${H}">${D.zonas.map(z => { const c = D.zona[z].coord, m = estadoZona(z), X = x(c[1]), Y = y(c[0]), d = X > W * .55;
     return `<g data-z="${z}" style="cursor:pointer"><circle cx="${X}" cy="${Y}" r="${z === zSel ? 15 : 11}" fill="${HEX[m.c]}" stroke="${z === zSel ? "#1f2a22" : "#fff"}" stroke-width="3"/>
     <text x="${z.startsWith("Altiplano") ? X : d ? X - 18 : X + 18}" y="${z.startsWith("Altiplano") ? Y + 28 : Y + 5}" font-size="13" font-family="Nunito,sans-serif" text-anchor="${z.startsWith("Altiplano") ? "middle" : d ? "end" : "start"}" font-weight="${z === zSel ? 800 : 600}">${zn(z).split(" (")[0]}</text></g>`; }).join("")}
     ${(() => { const c = D.zona[zSel].coord, w = 132, X = Math.min(Math.max(x(c[1]), w / 2 + 4), W - w / 2 - 4), Y = y(c[0]);
@@ -1537,14 +1544,22 @@ function dibujarMapa(zSel) {
   try {
     if (mapaL) { mapaL.remove(); mapaL = null; }
     const c = D.zona[zSel].coord;
-    mapaL = window.L.map(el, {attributionControl:true}).setView([c[0], c[1]], 9);
+    // Mapa FIJO de Moquegua: no se arrastra (así no estorba al bajar en el celular); solo se acerca o aleja
+    mapaL = window.L.map(el, {attributionControl:true, dragging:false, scrollWheelZoom:false, touchZoom:true, doubleClickZoom:true, boxZoom:false, keyboard:false, tap:false, zoomSnap:.25});
+    const lim = window.L.latLngBounds(D.zonas.map(z => D.zona[z].coord)).pad(.18);
+    mapaL.fitBounds(lim); mapaL.setMinZoom(mapaL.getZoom()); mapaL.setMaxBounds(lim.pad(.3));
+    mapaL.on("zoomend", () => { if (mapaL.getZoom() <= mapaL.getMinZoom() + .01) mapaL.fitBounds(lim); });   // al alejar, vuelve a verse toda la región
     const capa = window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:13, attribution:"© OpenStreetMap"});
     let err = 0; capa.on("tileerror", () => { if (++err === 3) { mapaL.remove(); mapaL = null; esquema(); } });
     capa.addTo(mapaL);
-    D.zonas.forEach(z => { const k = D.zona[z].coord, m = mLluvia(D.zona[z].hoy);
-      window.L.circleMarker([k[0], k[1]], {radius:z === zSel ? 15 : 11, color:z === zSel ? "#1f2a22" : "#fff", weight:3, fillColor:HEX[m.c], fillOpacity:.95})
-        .addTo(mapaL).bindTooltip(z === zSel ? `<b>${tx().aqui}</b><br>${zn(z).split(" (")[0]}` : zn(z).split(" (")[0], {permanent:z === zSel, direction:"top", offset:[0, -12], className:z === zSel ? "aqui" : ""}).on("click", () => { sel.value = z; cambiar(); }); });
+    D.zonas.forEach(z => { const k = D.zona[z].coord, m = estadoZona(z), sel_ = z === zSel, nom = zn(z).split(" (")[0];
+      window.L.circleMarker([k[0], k[1]], {radius:sel_ ? 16 : 12, color:sel_ ? "#1f2a22" : "#fff", weight:3, fillColor:HEX[m.c], fillOpacity:.95})
+        .addTo(mapaL).bindTooltip(sel_ ? `<b>${tx().aqui}</b><br>${nom}` : `${nom}<br><small>${m.s}</small>`, {permanent:sel_, direction:"top", offset:[0, -12], className:sel_ ? "aqui" : ""}).on("click", () => { sel.value = z; cambiar(); }); });
     if (window.miPos) window.L.circleMarker(window.miPos, {radius:8, color:"#fff", weight:3, fillColor:"#1f6fbf", fillOpacity:1}).addTo(mapaL);
+    const ley = window.L.control({position:"bottomleft"});
+    ley.onAdd = () => { const d = document.createElement("div"); d.className = "leyMapa"; const en = ln() === "en";
+      d.innerHTML = [["rojo", en ? "Careful" : "Cuidado"], ["amarillo", en ? "Watch" : "Atento"], ["verde", en ? "Normal" : "Normal"]].map(([c, t]) => `<span><i style="background:${HEX[c]}"></i>${t}</span>`).join(""); return d; };
+    ley.addTo(mapaL);
   } catch(e) { esquema(); }
 }
 
