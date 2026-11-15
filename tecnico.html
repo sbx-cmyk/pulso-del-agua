@@ -33,6 +33,16 @@
  <li>Cleaning: 18 false rain months removed (more than 3× the month's 95th percentile and above 30 mm), validated against GPM.</li>
 </ul>
 
+<h2>1b. What updates by itself every day <span class="es">/ Lo que se actualiza solo cada día</span></h2>
+<ul>
+ <li><b>In each farmer's phone, once a day:</b> the app downloads the NASA POWER daily series 1981-today for the area (T2M, T2M_MAX, T2M_MIN, PRECTOTCORR) and recomputes "Today in your area": temperature and frost nights of the last 30 days against the same dates of every year, and the fact of the day. Only the results are stored on the phone.</li>
+ <li><b>The next-month temperature model is retrained every day</b> in the phone with every complete month up to today (same regression as the notebook: month + trend + ONI; about 550 months). Checked against the notebook: Coast, December 2026 → 21.2 °C (notebook 21.1 °C).</li>
+ <li><b>A GitHub Actions robot</b> (<code>.github/workflows/actualizar_datos.yml</code>) downloads the NOAA ONI every morning into <code>oni.json</code>, because NOAA does not allow direct download from a web page.</li>
+ <li><b>Rain:</b> POWER's last days are provisional and sometimes far too high. If the live value is flagged as doubtful (more than 3× the 95th percentile and above 30 mm), the app shows the latest GPM IMERG check (Giovanni) if it is less than 45 days old; otherwise it says it is not sure.</li>
+ <li>The summer 2027 forecast and the 2027-2037 projection are seasonal products: they are recomputed with the notebook once per season, not daily.</li>
+</ul>
+<p class="es">Cada día, en el celular: se bajan los datos diarios de NASA POWER, se recalcula "Hoy en su zona" y se re-entrena el modelo de temperatura del próximo mes. Un robot de GitHub actualiza el índice de El Niño (ONI) cada mañana.</p>
+
 <h2>2. Trends 1981-2025 <span class="es">/ Tendencias</span></h2>
 <p>Area / Zona: <select id="zona"></select></p>
 <div class="card" id="txtTend"></div>
@@ -57,7 +67,7 @@
 <h2>4. Limitations <span class="es">/ Límites</span></h2>
 <ul>
  <li>Monthly rain is not forecast month by month nor years ahead.</li>
- <li>Recent temperature (last 30 days) is provisional NASA POWER data.</li>
+ <li>Recent temperature (last 30 days) is provisional NASA POWER data, updated daily.</li>
  <li>The temperature projection to 2037 assumes neutral ENSO; next-month temperature assumes the current El Niño persists.</li>
  <li>Each NASA POWER point represents ~50 km; it does not replace a local station. Future work: SENAMHI stations and PISCO.</li>
 </ul>

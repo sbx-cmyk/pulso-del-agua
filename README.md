@@ -13,3 +13,8 @@ NASA Space Apps Challenge 2026, reto "Be An Earth System Trend Detective!". Equi
 Datos: NASA POWER (MERRA-2), NASA GPM IMERG (vía Giovanni), índices de El Niño de NOAA CPC. Mapa: © colaboradores de OpenStreetMap.
 
 Use of AI: code, icons, illustrations (marked "AI" in the app) and the Yachachiq and TROYA logos were made with the help of AI tools (Claude and others) and reviewed by Team TROYA. The demo video is AI-assisted and carries a visible AI watermark. The recorded voices in `voz/` were generated with AI text-to-speech (ElevenLabs and LuvVoice). Quechua and Aymara texts are AI-assisted drafts pending review by native speakers.
+
+## Se actualiza solo cada día
+- En el celular de cada agricultor, una vez al día, la app baja los datos diarios de NASA POWER (1981 hasta hoy), recalcula "Hoy en su zona" (temperatura y heladas de los últimos 30 días frente a 45 años) y **re-entrena el modelo de temperatura del próximo mes** (mes + tendencia + El Niño).
+- Un robot de GitHub Actions (`.github/workflows/actualizar_datos.yml`) baja cada mañana el índice de El Niño (ONI) de NOAA a `oni.json`.
+- Si la lluvia provisional de POWER sale dudosa, se usa la última comprobación con el satélite GPM IMERG (Giovanni).

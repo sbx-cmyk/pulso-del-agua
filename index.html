@@ -247,6 +247,7 @@
   .chip.ciencia{background:#e3f0fb;color:#174a7a} .chip.ancestral{background:#e8f4e4;color:#1f5a2e} .chip.sena{background:#f6ead9;color:#7a4a1a}
   .saber.dato{background:#eef6fd;border-color:#cfe2f3} .saber.dato .sbH{color:#174a7a} .saber.dato .sbH small{font-weight:700;color:var(--sub);font-size:.85rem}
   .chip.vivo{background:#e6f6ea;color:#1f5a2e;display:inline-flex;align-items:center;gap:6px}
+  .hHoy{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px} .hHoy .chip{font-size:.8rem;font-weight:800;letter-spacing:0}
   .chip.vivo i{width:8px;height:8px;border-radius:50%;background:#2e7d32;animation:late2 1.2s infinite}
   @keyframes late2{50%{opacity:.25}}
   .cargaV{display:none;font-size:.8rem;font-weight:700;color:var(--sub)} .cargando .cargaV{display:inline}
@@ -811,27 +812,114 @@ function escenaCultivo(k, est) {
   return `<svg class="esc" viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg" role="img">${eClima(est, plantas(), k === "papa" ? 96 : 122)}</svg>`;
 }
 
-// ---------- Dato del día EN VIVO: NASA POWER diario (último día disponible vs. la misma fecha de 1981–2025) ----------
-const VIVO = {};
-async function statsVivo(Z) {
-  const [lat, lon] = Z.coord, hoy = new Date(), end = hoy.toISOString().slice(0, 10).replace(/-/g, "");
-  const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M_MAX,T2M_MIN,PRECTOTCORR&community=AG&longitude=${lon}&latitude=${lat}&start=19810101&end=${end}&format=JSON`;
-  const ctl = new AbortController(); setTimeout(() => ctl.abort(), 20000);
-  const j = await (await fetch(url, {signal: ctl.signal})).json();
-  const P = j.properties.parameter, ok = v => v !== undefined && v > -990;
-  const ks = Object.keys(P.T2M_MAX).filter(k => ok(P.T2M_MAX[k]) && ok(P.T2M_MIN[k]));
+// ---------- EN VIVO: NASA POWER diario (se baja una vez al día por zona y se guarda en el celular) ----------
+// Con esos datos se recalcula cada día: el dato del día, "Hoy en su zona" (lluvia, temperatura y heladas
+// de los últimos 30 días frente a 45 años) y se RE-ENTRENA el modelo de temperatura del próximo mes
+// (mes del año + tendencia + El Niño/ONI). El ONI lo actualiza cada día un robot de GitHub (oni.json).
+const VIVO = {}, VIVO_VER = 3;
+const fk = dt => `${dt.getFullYear()}${String(dt.getMonth() + 1).padStart(2, "0")}${String(dt.getDate()).padStart(2, "0")}`;
+const okV = v => v !== undefined && v !== null && v > -990;
+const hoyLocal = () => fk(new Date());
+async function bajarPower(Z) {
+  const [lat, lon] = Z.coord;
+  const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M,T2M_MAX,T2M_MIN,PRECTOTCORR&community=AG&longitude=${lon}&latitude=${lat}&start=19810101&end=${hoyLocal()}&format=JSON`;
+  const ctl = new AbortController(); setTimeout(() => ctl.abort(), 30000);
+  return (await (await fetch(url, {signal: ctl.signal})).json()).properties.parameter;
+}
+let ONI = null;   // [[año, mes, oni], ...] (mes central del trimestre)
+async function bajarONI() {
+  if (ONI) return ONI;
+  try { const j = await (await fetch("oni.json?d=" + hoyLocal(), {cache: "no-store"})).json(); if (j.oni && j.oni.length > 400) ONI = j; } catch (e) {}
+  return ONI;
+}
+const cuantil = (a, p) => { const s = [...a].sort((x, y) => x - y), i = (s.length - 1) * p, f = Math.floor(i); return s[f] + (s[Math.min(f + 1, s.length - 1)] - s[f]) * (i - f); };
+const prom = a => a.reduce((s, x) => s + x, 0) / a.length;
+
+// 1) Dato del día (último día con dato frente a la misma fecha de 1981 en adelante)
+function statsVivo(P) {
+  const ks = Object.keys(P.T2M_MAX).filter(k => okV(P.T2M_MAX[k]) && okV(P.T2M_MIN[k]));
   const k = ks[ks.length - 1], y0 = +k.slice(0, 4), md = k.slice(4), m = +md.slice(0, 2), d = +md.slice(2);
-  const fk = dt => `${dt.getFullYear()}${String(dt.getMonth() + 1).padStart(2, "0")}${String(dt.getDate()).padStart(2, "0")}`;
-  const ventana = (par, y, a, b) => { const out = []; for (let i = a; i <= b; i++) { const v = P[par][fk(new Date(y, m - 1, d + i))]; if (ok(v)) out.push(v); } return out; };
-  const media = a => a.reduce((s, x) => s + x, 0) / a.length;
+  const ventana = (par, y, a, b) => { const out = []; for (let i = a; i <= b; i++) { const v = P[par][fk(new Date(y, m - 1, d + i))]; if (okV(v)) out.push(v); } return out; };
   const lluvia7 = y => { const w = ventana("PRECTOTCORR", y, -6, 0); return w.length === 7 ? w.reduce((s, x) => s + x, 0) : null; };
   const yrs = [], nMx = [], nMn = [], nR = [];
   for (let y = 1981; y < y0; y++) {
     const mx = P.T2M_MAX[`${y}${md}`], mn = P.T2M_MIN[`${y}${md}`];
-    if (ok(mx) && ok(mn)) yrs.push({y, mx, mn, r: lluvia7(y)});
-    if (y >= 1991 && y <= 2020) { nMx.push(media(ventana("T2M_MAX", y, -3, 3))); nMn.push(media(ventana("T2M_MIN", y, -3, 3))); const r = lluvia7(y); if (r !== null) nR.push(r); }
+    if (okV(mx) && okV(mn)) yrs.push({y, mx, mn, r: lluvia7(y)});
+    if (y >= 1991 && y <= 2020) { nMx.push(prom(ventana("T2M_MAX", y, -3, 3))); nMn.push(prom(ventana("T2M_MIN", y, -3, 3))); const r = lluvia7(y); if (r !== null) nR.push(r); }
   }
-  return {k, y0, m, d, mx: P.T2M_MAX[k], mn: P.T2M_MIN[k], r: lluvia7(y0), nMx: media(nMx), nMn: media(nMn), nR: media(nR), yrs};
+  return {k, y0, m, d, mx: P.T2M_MAX[k], mn: P.T2M_MIN[k], r: lluvia7(y0), nMx: prom(nMx), nMn: prom(nMn), nR: prom(nR), yrs};
+}
+
+// 2) "Hoy en su zona": últimos 30 días con dato frente a esas mismas fechas de cada año (mismas reglas que el cuaderno)
+function hoyVivo(P, fin) {
+  const ks = Object.keys(P.T2M).filter(k => okV(P.T2M[k]) && okV(P.T2M_MIN[k]) && okV(P.PRECTOTCORR[k]) && (!fin || k <= fin));
+  const kf = ks[ks.length - 1], y0 = +kf.slice(0, 4), m = +kf.slice(4, 6), d = +kf.slice(6);
+  const dias = y => { const out = []; for (let i = 29; i >= 0; i--) out.push(fk(new Date(y, m - 1, d - i))); return out; };
+  const serie = (par, y) => { const v = dias(y).map(k => P[par][k]); return v.every(okV) ? v : null; };
+  const ll0 = serie("PRECTOTCORR", y0), t0 = serie("T2M", y0), mn0 = serie("T2M_MIN", y0);
+  if (!ll0 || !t0 || !mn0) return null;
+  const histR = [], histT = [], hel = [];
+  for (let y = 1981; y < y0; y++) {
+    const r = serie("PRECTOTCORR", y); if (r) histR.push(r.reduce((s, x) => s + x, 0));
+    const t = serie("T2M", y); if (t && y <= 2010) histT.push(prom(t));
+    const n = serie("T2M_MIN", y); if (n && y >= 1991 && y <= 2020) hel.push(n.filter(v => v < 0).length);
+  }
+  const [p10, p33, p50, p67, p90, p95] = [.1, 1 / 3, .5, 2 / 3, .9, .95].map(p => cuantil(histR, p));
+  const ll = ll0.reduce((s, x) => s + x, 0), t = prom(t0);
+  let color, lado;
+  if (ll > 3 * p95 && ll > 30) [color, lado] = ["gris", "dato dudoso"];
+  else if (p67 < 10) [color, lado] = ["verde", "seco habitual"];
+  else if (ll < p10) [color, lado] = ["rojo", "seco"];
+  else if (ll < p33) [color, lado] = ["amarillo", "seco"];
+  else if (ll > p90) [color, lado] = ["rojo", "lluvioso"];
+  else if (ll > p67) [color, lado] = ["amarillo", "lluvioso"];
+  else [color, lado] = ["verde", "normal"];
+  const iso = k => `${k.slice(0, 4)}-${k.slice(4, 6)}-${k.slice(6)}`, desde = iso(dias(y0)[0]), hasta = iso(kf);
+  const r1 = x => Math.round(x * 10) / 10, tn = prom(histT);
+  return {
+    hoy: {desde, hasta, dias_con_dato: 30, fuente_lluvia: "POWER", lluvia_30_dias_mm: r1(ll), lluvia_normal_mm: r1(p50), limite_seco_mm: r1(p33),
+          limite_lluvioso_mm: r1(p67), color, lado, temp_30_dias: r1(t), temp_normal_1981_2010: r1(tn), diferencia_temp: r1(t - tn), vivo: true},
+    heladas: {desde, hasta, noches_helada: mn0.filter(v => v < 0).length, minima_c: r1(Math.min(...mn0)), prom_minima_c: r1(prom(mn0)),
+              normal_p25: Math.round(cuantil(hel, .25)), normal_mediana: Math.round(cuantil(hel, .5)), normal_p75: Math.round(cuantil(hel, .75)), vivo: true}};
+}
+
+// 3) Modelo del próximo mes, RE-ENTRENADO con todos los meses completos hasta hoy:
+//    temperatura = efecto del mes + tendencia (año) + El Niño (ONI)   (el mismo modelo del cuaderno)
+function resolver(A, b) {   // Gauss-Jordan: devuelve [solución, inversa]
+  const n = A.length, M = A.map((f, i) => [...f, ...A.map((_, j) => +(i === j)), b[i]]);
+  for (let c = 0; c < n; c++) {
+    let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+    [M[c], M[p]] = [M[p], M[c]]; const v = M[c][c]; if (Math.abs(v) < 1e-12) return null;
+    for (let j = 0; j <= 2 * n; j++) M[c][j] /= v;
+    for (let r = 0; r < n; r++) if (r !== c) { const f = M[r][c]; if (f) for (let j = 0; j <= 2 * n; j++) M[r][j] -= f * M[c][j]; }
+  }
+  return [M.map(f => f[2 * n]), M.map(f => f.slice(n, 2 * n))];
+}
+function modeloVivo(P, oni) {
+  if (!oni) return null;
+  const O = {}; oni.oni.forEach(([y, m, v]) => O[`${y}-${m}`] = v);
+  const mes = {};   // promedio mensual solo de meses completos
+  Object.keys(P.T2M).forEach(k => { const v = P.T2M[k], c = `${+k.slice(0, 4)}-${+k.slice(4, 6)}`; (mes[c] = mes[c] || []).push(okV(v) ? v : NaN); });
+  const filas = [];
+  Object.entries(mes).forEach(([c, v]) => { const [y, m] = c.split("-").map(Number);
+    if (v.length === new Date(y, m, 0).getDate() && v.every(x => !isNaN(x))) filas.push({y, m, t: prom(v), oni: O[c]}); });
+  const fila = (y, m, o) => { const x = new Array(14).fill(0); x[m - 1] = 1; x[12] = y - 2000; x[13] = o; return x; };
+  const ent = filas.filter(f => f.oni !== undefined); if (ent.length < 200) return null;
+  const XtX = Array.from({length: 14}, () => new Array(14).fill(0)), Xty = new Array(14).fill(0);
+  ent.forEach(f => { const x = fila(f.y, f.m, f.oni); for (let i = 0; i < 14; i++) { Xty[i] += x[i] * f.t; for (let j = 0; j < 14; j++) XtX[i][j] += x[i] * x[j]; } });
+  const sol = resolver(XtX, Xty); if (!sol) return null;
+  const [b, inv] = sol, dot = (a, c) => a.reduce((s, x, i) => s + x * c[i], 0);
+  const rss = ent.reduce((s, f) => s + (f.t - dot(fila(f.y, f.m, f.oni), b)) ** 2, 0), s2 = rss / (ent.length - 14);
+  const oUlt = oni.oni[oni.oni.length - 1][2];
+  const normal = m => prom(filas.filter(f => f.m === m && f.y <= 2010).map(f => f.t));
+  const hoy = new Date(), r1 = x => Math.round(x * 10) / 10, out = [];
+  for (let i = 1; i <= 3; i++) {
+    const dt = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1), y = dt.getFullYear(), m = dt.getMonth() + 1, x = fila(y, m, oUlt);
+    const yv = dot(x, b), e = Math.sqrt(s2 + s2 * dot(x, inv.map(f => dot(f, x))));
+    out.push({anio: y, mes: m, temp_esperada: r1(yv), temp_min: r1(yv - 1.28 * e), temp_max: r1(yv + 1.28 * e), normal: r1(normal(m)), efecto_nino: Math.round(b[13] * oUlt * 100) / 100, vivo: true});
+  }
+  const u = ent[ent.length - 1];
+  return {proximo: out, meses: ent.length, hasta: `${u.y}-${String(u.m).padStart(2, "0")}`, oni: oUlt, oni_mes: oni.oni[oni.oni.length - 1].slice(0, 2), error: r1(Math.sqrt(s2))};
 }
 function textosVivo(S, Z) {
   const en = ln() === "en", f1 = x => fmt(x, 1), N = S.yrs.length, out = [];
@@ -866,16 +954,59 @@ function textosVivo(S, Z) {
   }
   return out.sort((a, b) => a.raro - b.raro).map(o => ({t: o.t, vivo: true, fecha}));
 }
+// Guarda solo los resultados (no los datos crudos) una vez por día y por zona
+// La lluvia de los últimos días de POWER es provisional y a veces sale exagerada ("dato dudoso").
+// En ese caso se usa la última comprobación con el satélite GPM IMERG (Giovanni), si tiene menos de 45 días.
+const BASE_HOY = {}; D.zonas.forEach(z => BASE_HOY[z] = Object.assign({}, D.zona[z].hoy));
+function aplicarVivo(z) {
+  const R = VIVO[z]; if (!R) return;
+  if (R.hoy && R.hoy.hoy) {
+    const h = Object.assign({}, R.hoy.hoy), b = BASE_HOY[z];
+    const edad = b && b.hasta ? (new Date() - new Date(b.hasta)) / 864e5 : 999;
+    if (h.color === "gris" && b && b.fuente_lluvia === "IMERG" && edad < 45) {
+      ["lluvia_30_dias_mm", "lluvia_normal_mm", "limite_seco_mm", "limite_lluvioso_mm", "color", "lado", "fuente_lluvia"].forEach(k => h[k] = b[k]);
+      h.lluvia_hasta = b.hasta;
+    }
+    D.zona[z].hoy = h; D.zona[z].heladas = R.hoy.heladas;
+  }
+  if (R.modelo) D.zona[z].proximo = R.modelo.proximo;
+}
+function vivoGuardado(z) {
+  try { const c = JSON.parse(localStorage.getItem("vivo_" + z) || "null"); if (c && c.dia === hoyLocal() && c.ver === VIVO_VER) return c; } catch (e) {}
+  return null;
+}
+async function calcularVivo(z) {
+  const [P, oni] = await Promise.all([bajarPower(D.zona[z]), bajarONI()]);
+  const R = {dia: hoyLocal(), ver: VIVO_VER, stats: statsVivo(P), hoy: hoyVivo(P), modelo: modeloVivo(P, oni)};
+  try { localStorage.setItem("vivo_" + z, JSON.stringify(R)); } catch (e) {}
+  return R;
+}
+// Al abrir: lo ya calculado hoy se usa enseguida, sin esperar a internet
+D.zonas.forEach(z => { const c = vivoGuardado(z); if (c) { VIVO[z] = c; aplicarVivo(z); } });
+let vivoCola = false;
 async function cargarVivo(z) {
   const el = () => document.getElementById("datoDia");
   try {
-    if (!VIVO[z]) { const ck = "vivo_" + z + "_" + new Date().toISOString().slice(0, 10);
-      try { const c = localStorage.getItem(ck); if (c) VIVO[z] = JSON.parse(c); } catch (e) {}
-      if (!VIVO[z]) { if (el()) el().classList.add("cargando"); VIVO[z] = await statsVivo(D.zona[z]); try { localStorage.setItem(ck, JSON.stringify(VIVO[z])); } catch (e) {} } }
+    if (!VIVO[z]) {
+      if (el()) el().classList.add("cargando");
+      VIVO[z] = await calcularVivo(z); aplicarVivo(z);
+      if (sel.value === z) { pintar(); return; }   // vuelve a dibujar con lo nuevo (la 2.a vez ya no descarga)
+    }
     if (sel.value !== z || !el()) return;
-    DATOS_DIA = [...textosVivo(VIVO[z], D.zona[z]), ...DATOS_DIA.filter(x => !x.vivo)]; datoI = 0;
+    DATOS_DIA = [...textosVivo(VIVO[z].stats, D.zona[z]), ...DATOS_DIA.filter(x => !x.vivo)]; datoI = 0;
     el().classList.remove("cargando"); el().innerHTML = datoHTML();
+    const f = document.getElementById("fechaVivo"); if (f) f.innerHTML = fechaVivoHTML(z);
+    // Las demás zonas se actualizan despacio, una por una, para pintar bien los colores del mapa
+    if (!vivoCola) { vivoCola = true; setTimeout(async () => {
+      for (const o of D.zonas) if (!VIVO[o]) { try { VIVO[o] = await calcularVivo(o); aplicarVivo(o); } catch (e) {} }
+      dibujarMapa(sel.value); }, 1500); }
   } catch (e) { if (el()) el().classList.remove("cargando"); }
+}
+function fechaVivoHTML(z) {
+  const R = VIVO[z], h = D.zona[z].hoy;
+  if (!R || !R.hoy || !h.vivo) return "";
+  const [y, m, d] = h.hasta.split("-");
+  return `<span class="chip vivo"><i></i>NASA · ${d}/${m}/${y}</span>`;
 }
 
 // ---------- Quechua (Collao) y Aimara (sur): BORRADOR para revisión con hablantes de Moquegua ----------
@@ -1616,7 +1747,7 @@ function pintar() {
   // INICIO
   DATOS_DIA = datosDelDia(Z, t);
   document.getElementById("inicio").innerHTML = `
-    <h2>${t.hoy}</h2>
+    <h2 class="hHoy">${t.hoy} <span id="fechaVivo">${fechaVivoHTML(z)}</span></h2>
     <div class="dos"><div class="tiles">
       ${semaforo("s1", t.lluvia, mL)}
       ${mH ? semaforo("s2", t.hel, mH, t.hNota(Z.heladas.normal_mediana)) : semaforo("s2", t.temp, mT)}
