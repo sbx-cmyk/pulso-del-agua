@@ -203,6 +203,9 @@
   .cult .ck{font-size:.8rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-top:10px}
   .cult .cv{font-weight:800;font-size:1.02rem;color:var(--verdeO)}
   .cult .cn{font-size:.95rem}
+  .cEsc,.gEsc{position:relative}
+  .cEsc::after,.gEsc::after{content:"IA";position:absolute;right:6px;bottom:6px;font:800 11px/1 sans-serif;letter-spacing:.5px;color:#fff;background:rgba(0,0,0,.55);padding:3px 6px;border-radius:6px;pointer-events:none}
+  html[data-l=en] .cEsc::after,html[data-l=en] .gEsc::after{content:"AI"}
   .cEsc{margin:10px 0 2px;border-radius:14px;overflow:hidden;border:2px solid var(--line);line-height:0}
   .cEsc .esc{width:100%;height:auto;display:block}
   .cults{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))!important}
@@ -978,6 +981,7 @@ const TR = {
  "Cuidado": ["Cuidakuy", "Arxatasim"], "Atento": ["Qhawakuy", "Amuyasim"],
  "Las voces grabadas se generaron con IA (ElevenLabs y LuvVoice).": ["Grabasqa kunkakunaqa IA-wan ruwasqa (ElevenLabs, LuvVoice).", "Grabat arunakax IA-mpi lurataw (ElevenLabs, LuvVoice)."],
  "El nombre viene del quechua: un yachachiq es «el que sabe y enseña lo que sabe».": ["Sutinqa runasimimanta: yachachiqqa «yachaq, yachasqanta yachachiq» ninanmi.", "Sutipax qhichwa arutwa: yachachiqax «yatiri, yatitap yatichiri» sañ muni."],
+ "Código, íconos, ilustraciones (marcadas con «IA») y el logo de Yachachiq se hicieron con ayuda de un asistente de IA (Claude) y fueron revisados por el equipo TROYA.": ["Código, íconokuna, siq'ikuna («IA» nisqawan) Yachachiq logopas IA yanapaqwan (Claude) ruwasqa, TROYA huñuwan qhawasqa.", "Código, ícononaka, dibujonaka («IA» chimpumpi) Yachachiq logosa IA yanapiri (Claude) ukamp lurata, TROYA tamamp uñakipata."],
  "Datos:": ["Willakuykuna:", "Yatiyawinaka:"], "Mapa: © colaboradores de OpenStreetMap.": ["Mapa: © OpenStreetMap yanapaqkuna.", "Mapa: © OpenStreetMap yanapirinaka."],
  "Código, íconos e ilustraciones hechos con ayuda de un asistente de IA (Claude) y revisados por el equipo TROYA.": ["Código, íconokuna, siq'ikunapas IA yanapaqwan (Claude) ruwasqa, TROYA huñuwan qhawasqa.", "Código, ícononaka, dibujonakasa IA yanapiri (Claude) ukamp lurata, TROYA tamamp uñakipata."],
  "De la FAO (protección contra heladas), el MINSA y el SENAMHI (sol y frío), el MIDAGRI y el Fondo Sierra Azul (qochas, cobertizos), la Autoridad Nacional del Agua (canales) e investigaciones universitarias de cada cultivo.": ["FAO (qasamanta amachakuy), MINSA, SENAMHI (inti, chiri), MIDAGRI, Fondo Sierra Azul (quchakuna, cobertizokuna), Autoridad Nacional del Agua (yarqhakuna), universidadkunapa sapa tarpuymanta yachaykunanpas.", "FAO (juyphit jark'aqasiña), MINSA, SENAMHI (inti, thaya), MIDAGRI, Fondo Sierra Azul (qutanaka, cobertizonaka), Autoridad Nacional del Agua (larq'anaka), universidadanakan sapa satanakat yatxatawinakapasa."],
@@ -1587,6 +1591,7 @@ function irA(s) { seccion = s; document.querySelectorAll("section").forEach(x =>
   if (s === "inicio") setTimeout(() => mapaL && mapaL.invalidateSize(), 50); }
 
 function pintar() {
+  document.documentElement.dataset.l = lang;
   voz = {};
   const t = tx(), zPrev = sel.value || D.zonas[0];
   document.documentElement.lang = ln();
@@ -1675,8 +1680,8 @@ function pintar() {
       ? "From FAO (frost protection), MINSA and SENAMHI (sun and cold), MIDAGRI and Fondo Sierra Azul (qochas, shelters), the National Water Authority (canals) and university research on each crop. The full list is on the technical page."
       : "De la FAO (protección contra heladas), el MINSA y el SENAMHI (sol y frío), el MIDAGRI y el Fondo Sierra Azul (qochas, cobertizos), la Autoridad Nacional del Agua (canales) e investigaciones universitarias de cada cultivo. La lista completa está en la página técnica."}</p></div></div>
     <p style="margin:18px 4px">${ico("lupa", 26)} <a href="tecnico.html">${t.tec}</a></p>
-    <footer>${ln() === "en" ? "Data: NASA POWER (MERRA-2), NASA GPM IMERG (via Giovanni), NOAA CPC El Niño indices. Map: © OpenStreetMap contributors. Code, icons and illustrations written with the help of an AI assistant (Claude) and reviewed by Team TROYA. Recorded voices were generated with AI text-to-speech (ElevenLabs and LuvVoice). Not an official forecasting service."
-      : "Datos: NASA POWER (MERRA-2), NASA GPM IMERG (vía Giovanni), índices de El Niño de NOAA CPC. Mapa: © colaboradores de OpenStreetMap. Código, íconos e ilustraciones hechos con ayuda de un asistente de IA (Claude) y revisados por el equipo TROYA. Las voces grabadas se generaron con IA (ElevenLabs y LuvVoice). No es un servicio oficial de pronóstico."}</footer>`;
+    <footer>${ln() === "en" ? "Data: NASA POWER (MERRA-2), NASA GPM IMERG (via Giovanni), NOAA CPC El Niño indices. Map: © OpenStreetMap contributors. Code, icons, illustrations (marked “AI”) and the Yachachiq logo were made with the help of an AI assistant (Claude) and reviewed by Team TROYA. Recorded voices were generated with AI text-to-speech (ElevenLabs and LuvVoice). Not an official forecasting service."
+      : "Datos: NASA POWER (MERRA-2), NASA GPM IMERG (vía Giovanni), índices de El Niño de NOAA CPC. Mapa: © colaboradores de OpenStreetMap. Código, íconos, ilustraciones (marcadas con «IA») y el logo de Yachachiq se hicieron con ayuda de un asistente de IA (Claude) y fueron revisados por el equipo TROYA. Las voces grabadas se generaron con IA (ElevenLabs y LuvVoice). No es un servicio oficial de pronóstico."}</footer>`;
 
   dibujarMapa(z);
   activarTraduccion();   // quechua / aimara: traduce todo lo que quedó en castellano
