@@ -98,6 +98,28 @@
   #zona{font-size:1.15rem;padding:12px 14px}
   h2{margin:14px 0 8px}
   .dos{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;align-items:stretch}
+  .obj{font-size:.92rem;font-weight:700;color:var(--sub);margin:2px 2px 6px}
+  .pasos{display:flex;align-items:center;gap:4px;margin:0 0 10px;flex-wrap:nowrap}
+  .pasos button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:2px solid var(--line);background:var(--card);border-radius:999px;padding:7px 6px;font:inherit;font-weight:800;font-size:.85rem;color:var(--sub);cursor:pointer;min-width:0;white-space:nowrap}
+  .pasos button b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--line);color:var(--txt);font-size:.8rem;flex:none}
+  .pasos button.on{border-color:var(--verdeO);color:var(--verdeO);background:#eaf3e6}
+  .pasos button.on b{background:var(--verdeO);color:#fff}
+  .pasos .fl{color:var(--sub);font-weight:800}
+  #chacra .pasos button.on{border-color:#5b47c4;color:#4a38a8;background:#efecfb} #chacra .pasos button.on b{background:#5b47c4}
+  .subH{color:var(--sub);font-weight:700;margin:-6px 2px 10px;font-size:.95rem}
+  .tiles .sem.ancho{grid-column:1/-1;flex-direction:row!important;align-items:center!important;min-height:0!important}
+  .irSig{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin:14px 0;padding:16px 18px;border:0;border-radius:18px;background:var(--verdeO);color:#fff;font:inherit;font-weight:800;font-size:1.1rem;cursor:pointer;text-align:left}
+  .irSig span{font-size:1.8rem;line-height:1}
+  #chacra .irSig{background:#5b47c4}
+  .pronoBan{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#5b47c4,#7a63e0);color:#fff;border-radius:20px;padding:14px 18px;margin:4px 0 14px}
+  .pronoBan .pt{font-size:1.35rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+  .pronoBan .ps{font-weight:700;opacity:.95}
+  .pronoBan svg{background:#fff;border-radius:14px;padding:4px;flex:none}
+  #chacra .grande,#chacra .sem,#chacra .tarea2{border-color:#d6cff5;border-style:dashed}
+  #chacra .grande{position:relative}
+  #chacra .etq{display:inline-block;background:#efecfb;color:#4a38a8;font-weight:900;font-size:.8rem;text-transform:uppercase;border-radius:999px;padding:3px 10px;margin-bottom:6px}
+  #chacra .btnSaberes{margin-top:14px}
+  @media (max-width:800px){ .obj{font-size:.82rem;margin-bottom:4px} .pasos{gap:5px} .pasos .fl{display:none} .pasos button{font-size:.76rem;padding:6px 3px;gap:4px;letter-spacing:-.01em} .pasos button b{width:18px;height:18px;font-size:.72rem} .subH{font-size:.85rem;margin-bottom:8px} .pronoBan .pt{font-size:1.1rem} }
   .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tiles .sem{flex-direction:column;align-items:flex-start;gap:8px;margin:0;padding:16px;position:relative;min-height:190px}
   .tiles .sem .vz{position:absolute;top:14px;right:14px;font-size:1.7rem}
@@ -479,6 +501,7 @@ const ICON = {
  cerrar:`<circle cx="24" cy="24" r="17" fill="#f1efe7" stroke="${K}" stroke-width="2.5"/><path d="M17 17 L31 31 M31 17 L17 31" stroke="${K}" stroke-width="3.5" stroke-linecap="round"/>`,
  play:`<circle cx="24" cy="24" r="18" fill="#ffffff" stroke="#ffffff" stroke-width="1"/><path d="M19 15 L34 24 L19 33Z" fill="#1f5a2e"/>`,
  lupa:`<circle cx="20" cy="20" r="11" fill="#e8f3fb" stroke="${K}" stroke-width="3"/><path d="M28 28 L40 40" stroke="${K}" stroke-width="5" stroke-linecap="round"/><path d="M14 21 Q16 14 21 13" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+ calendario:`<rect x="6" y="10" width="36" height="32" rx="5" fill="#fff" stroke="${K}" stroke-width="3"/><path d="M6 15 A5 5 0 0 1 11 10 H37 A5 5 0 0 1 42 15 V20 H6Z" fill="#6a55c9" stroke="${K}" stroke-width="3" stroke-linejoin="round"/><path d="M15 5v9M33 5v9" stroke="${K}" stroke-width="3.5" stroke-linecap="round"/><rect x="27" y="26" width="9" height="9" rx="2" fill="#f2c94c" stroke="${K}" stroke-width="2.2"/><path d="M13 29h8M13 36h8" stroke="#9aa09c" stroke-width="3" stroke-linecap="round"/>`,
  casa:`<path d="M8 23 L24 9 L40 23" fill="none" stroke="${K}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 21 V40 H36 V21 L24 11Z" fill="#f2c97d" stroke="${K}" stroke-width="2.5" stroke-linejoin="round"/><path d="M8 23 L24 9 L40 23 L37 25 L24 14 L11 25Z" fill="#c8553d" stroke="${K}" stroke-width="2.5" stroke-linejoin="round"/><rect x="20" y="28" width="8" height="12" rx="1.5" fill="#7a5230" stroke="${K}" stroke-width="2"/>`,
  brote:`<path d="M24 42 V24" stroke="#4e8a2e" stroke-width="3.5" stroke-linecap="round"/><path d="M24 26 C24 16 16 10 7 11 C7 21 14 27 24 26Z" fill="#7fbf4a" stroke="${K}" stroke-width="2.5" stroke-linejoin="round"/><path d="M24 22 C25 13 32 7 41 8 C41 18 34 23 24 22Z" fill="#a5d36a" stroke="${K}" stroke-width="2.5" stroke-linejoin="round"/><path d="M12 42 Q24 36 36 42Z" fill="#8a5a33" stroke="${K}" stroke-width="2.5" stroke-linejoin="round"/>`,
  info:`<circle cx="24" cy="24" r="17" fill="#ffe6a3" stroke="${K}" stroke-width="2.5"/><circle cx="24" cy="15.5" r="2.6" fill="${K}"/><path d="M24 21 V33" stroke="${K}" stroke-width="4" stroke-linecap="round"/>`,
@@ -1033,7 +1056,7 @@ function fechaVivoHTML(z) {
 // ---------- Quechua (Collao) y Aimara (sur): BORRADOR para revisión con hablantes de Moquegua ----------
 // Solo la pantalla principal. Voz, guías largas, cultivos y saberes siguen en español hasta la revisión.
 const QA = {
- qu: {menu: [["casa", "Qallariy"], ["regadera", "Chakray"], ["brote", "Tarpuy"], ["info", "Willakuy"]],
+ qu: {menu: [["casa", "Kunan"], ["calendario", "Hamuq killa"], ["brote", "Tarpuy"], ["info", "Willakuy"]],
   hoy: "Kunan llaqtaykipi", hel: "Kay killapi qasakuna", hNo: "Mana qasa kanchu", hPocas: n => `${n} qasa`, hNota: n => `Sapa watan: ${n} tuta hina`,
   saludo: "¡Napaykullayki! Llamiykuway, willasqayki.", lluvia: "Kay killapi para", temp: "Kay killapi q'uñi chiri", verano: v => `Puquy pacha ${v}`,
   lNormal: "Sapa kutin hina", lMucha: "Ancha para", lPoca: "Pisi para", lDuda: "Mana sut'ichu",
@@ -1047,7 +1070,7 @@ const QA = {
   proxMes: "Hamuq killa", hara: "Yaqa kayhina kanqa", lonormal: "Sapa kutin", porNino: "El Niño rayku",
   hacer: "Kay p'unchawkunapi ima ruwana", cuando: "¿Hayk'aqtaq llaqtaykipi paran?",
   prep: "Qhichwa simipi (Collao) — <b>borrador</b>: hablantes de Moquegua revisachkanku. Rimaynin, unay qillqakunapas, kunanqa castellanopi."},
- ay: {menu: [["casa", "Qalltawi"], ["regadera", "Yapuja"], ["brote", "Satanaka"], ["info", "Yatiyawi"]],
+ ay: {menu: [["casa", "Jichhüru"], ["calendario", "Jutir phaxsi"], ["brote", "Satanaka"], ["info", "Yatiyawi"]],
   hoy: "Jichhürux markamana", hel: "Aka phaxsin juyphinaka", hNo: "Janiw juyphïkiti", hPocas: n => `${n} juyphi`, hNota: n => `Sapa mara: niya ${n} aruma`,
   saludo: "¡Kamisaki! Llamkt'ita, yatiyäma.", lluvia: "Aka phaxsin jallu", temp: "Aka phaxsin junt'u thaya", verano: v => `Jallu pacha ${v}`,
   lNormal: "Walikiwa", lMucha: "Walja jallu", lPoca: "Juk'a jallu", lDuda: "Janiw qhanakiti",
@@ -1089,6 +1112,12 @@ function elegirIdioma(l) { lang = l; try { localStorage.setItem("idioma", l); lo
 // ---------- Traducción COMPLETA a quechua (Collao) y aimara — BORRADOR para revisión con hablantes de Moquegua ----------
 // Funciona oración por oración: lo que se ve en pantalla y lo que dice el agricultor. Lo que no está aquí queda en castellano.
 const TR = {
+ "Hoy": ["Kunan", "Jichhüru"], "Próximo mes": ["Hamuq killa", "Jutir phaxsi"], "Ahora": ["Kunan", "Jichhaxa"],
+ "Yachachiq le ayuda a planificar su chacra con 45 años de datos de la NASA.": ["Yachachiqqa chakraykita wakichinaykipaq yanapasunki, NASA nisqapa 45 wata willakuyninkunawan.", "Yachachiqax yapuma wakichañatakiw yanapt'ätam, NASA ukan 45 mara yatiyawinakapampi."],
+ "Lo que pasó en los últimos 30 días": ["Qhipa 30 p'unchawkunapi imakunachus karqan", "Qhipa 30 urunakan kunas utjawayi"],
+ "Paso 3: ¿qué hago con mis cultivos?": ["3 ruway: ¿tarpusqaykunawan imatataq ruwasaq?", "3 lurawi: ¿satanakajampi kuns lurä?"],
+ "Esto es lo que viene el próximo mes. No es el clima de hoy.": ["Kayqa hamuq killapi hamuqmi. Manam kunan p'unchawpa pachanchu.", "Akax jutir phaxsin jutkani ukawa. Janiw jichhürun pachapakiti."],
+ "Consejos para sus cultivos": ["Tarpusqaykikunapaq yuyaychaykuna", "Satanakamatak iwxt'awinaka"],
  // --- Menú, títulos, botones ---
  "Inicio": ["Qallariy", "Qalltawi"], "Mi chacra": ["Chakray", "Yapuja"], "Mis cultivos": ["Tarpuy", "Satanaka"], "Información": ["Willakuy", "Yatiyawi"],
  "Idioma": ["Simi", "Aru"], "Hoy en su zona": ["Kunan llaqtaykipi", "Jichhürux markamana"], "Usted está aquí": ["Kaypi kachkanki", "Akankasktawa"],
@@ -1227,6 +1256,14 @@ const TR = {
 };
 // Oraciones con números (plantillas)
 const TRP = [
+ [/^Paso 2: ¿qué viene en (\S+)\?$/, ["2 ruway: ¿$1 killapi imataq hamunqa?", "2 lurawi: ¿$1 phaxsinx kunas jutani?"]],
+ [/^Pronóstico para (\S+)$/, ["$1 killapaq willakuy", "$1 phaxsitak yatiyawi"]],
+ [/^Prepárese para (\S+)$/, ["$1 killapaq wakichikuy", "$1 phaxsitak wakichasim"]],
+ [/^Lluvia normal en (\S+)$/, ["$1 killapi sapa kutin para", "$1 phaxsinx sapa kuti jallu"]],
+ [/^Suele llover unos (\d+) mm en (\S+)$/, ["$2 killapi yaqa $1 mm paran", "$2 phaxsinx niya $1 mm jallux puri"]],
+ [/^Suele llover unos (\d+) mm en (\S+)\.$/, ["$2 killapi yaqa $1 mm paran.", "$2 phaxsinx niya $1 mm jallux puri."]],
+ [/^Casi no llueve en (\S+)\.?$/, ["$1 killapi yaqa manam paranchu.", "$1 phaxsinx niya janiw jallux purkiti."]],
+ [/^Verano (\d+) \(diciembre a marzo\)$/, ["Puquy pacha $1 (diciembre – marzo)", "Jallu pacha $1 (diciembre – marzo)"]],
  [/^Paso (\d+) de (\d+)$/, ["Ruway $1 / $2", "Lurawi $1 / $2"]],
  [/^(\d+) heladas$/, ["$1 qasa", "$1 juyphi"]],
  [/^Lo normal: unas (\d+) noches\.$/, ["Sapa watan: $1 tuta hina.", "Sapa mara: niya $1 aruma."]],
@@ -1308,7 +1345,7 @@ const T = x => x === true || String(x).toLowerCase() === "true";
 const ZN = {"Costa (Ilo)":"Coast (Ilo)","Desierto intermedio (Moquegua bajo)":"Middle desert (lower Moquegua)","Valle de Omate":"Omate Valley",
   "Sierra media (Carumas-Torata)":"Mid highlands (Carumas-Torata)","Zona alta norte (Ichuña)":"Northern highlands (Ichuña)","Altiplano (represa Pasto Grande)":"High plateau (Pasto Grande dam)"};
 const L = {
- es:{menu:[["casa","Inicio"],["regadera","Mi chacra"],["brote","Mis cultivos"],["info","Información"]],
+ es:{menu:[["casa","Hoy"],["calendario","Próximo mes"],["brote","Mis cultivos"],["info","Información"]],
   hoy:"Hoy en su zona", hel:"Heladas este mes", hNo:"Sin heladas", hPocas:n=>`${n} heladas`, hNota:(n)=>`Lo normal: unas ${n} noches. Dato provisional.`, saludo:"¡Hola! Tóqueme y le cuento.", lluvia:"Lluvia este mes", temp:"Temperatura este mes", verano:v=>`Verano ${v}`,
   lNormal:"Normal", lMucha:"Mucha lluvia", lPoca:"Poca lluvia", lDuda:"Sin dato seguro",
   cMucho:"Mucho calor", cMas:"Más calor", cNormal:"Normal", cFrio:"Más frío",
@@ -1325,6 +1362,10 @@ const L = {
   mc:["E","F","M","A","M","J","J","A","S","O","N","D"],
   hara:"Hará en promedio", entre:(a,b)=>`entre ${a} y ${b} °C`, lonormal:"Lo normal", porNino:"Por El Niño",
   hacer:"Qué hacer estos días", cuando:"¿Cuándo llueve en su zona?", cuandoNota:"",
+  obj:"Yachachiq le ayuda a planificar su chacra con 45 años de datos de la NASA.", pasos:["Hoy","Próximo mes","Mis cultivos"],
+  hoySub:"Lo que pasó en los últimos 30 días", irMes:m=>`Paso 2: ¿qué viene en ${m}?`, irCult:"Paso 3: ¿qué hago con mis cultivos?",
+  prono:m=>`Pronóstico para ${m}`, pronoSub:"Esto es lo que viene el próximo mes. No es el clima de hoy.", prepM:m=>`Prepárese para ${m}`,
+  llNormMes:m=>`Lluvia normal en ${m}`, llNormV:(m,x)=>x < 3 ? `Casi no llueve en ${m}` : `Suele llover unos ${x} mm en ${m}`, verTit:v=>`Verano ${v} (diciembre a marzo)`,
   cultivo:"Pronto: elija su cultivo y le diremos cómo le afecta el clima.", mesNota:"Error típico: ±0,5 °C.",
   qEs:"¿Qué es Yachachiq?", qEsT:"Una app <b>gratis</b> que le dice cómo está la lluvia y el calor en su zona, y qué esperar. Usa 45 años de datos de la NASA, de satélites y modelos del clima. El nombre viene del quechua: un <b>yachachiq</b> es «el que sabe y enseña lo que sabe».",
   noSabe:"Lo que no sabe", noSabeT:"No dice si llueve mañana: para eso, el SENAMHI. Es información de apoyo; no reemplaza su experiencia.",
@@ -1332,7 +1373,7 @@ const L = {
   equipo:"Quiénes somos", equipoT:"Equipo TROYA, estudiantes de la UNAM (Moquegua), para el NASA Space Apps Challenge 2026.",
   tec:"Para revisores: detalle técnico y pruebas del modelo", noUbic:"No se pudo ubicar. Elija su zona en la lista.",
   prep:"Traducción en preparación con hablantes nativos de Moquegua. Por ahora, en español."},
- en:{menu:[["casa","Home"],["regadera","My farm"],["brote","My crops"],["info","Information"]],
+ en:{menu:[["casa","Today"],["calendario","Next month"],["brote","My crops"],["info","Information"]],
   hoy:"Today in your area", hel:"Frost this month", hNo:"No frost", hPocas:n=>`${n} frost nights`, hNota:(n)=>`Normal: about ${n} nights. Provisional data.`, saludo:"Hello! Tap me and I will tell you.", lluvia:"Rain this month", temp:"Temperature this month", verano:v=>`Summer ${v}`,
   lNormal:"Normal", lMucha:"A lot of rain", lPoca:"Little rain", lDuda:"No reliable data",
   cMucho:"Much hotter", cMas:"Hotter", cNormal:"Normal", cFrio:"Colder",
@@ -1348,6 +1389,10 @@ const L = {
   proxMes:"Next month", meses:["January","February","March","April","May","June","July","August","September","October","November","December"],
   mc:["J","F","M","A","M","J","J","A","S","O","N","D"],
   hara:"Expected average", entre:(a,b)=>`between ${a} and ${b} °C`, lonormal:"Normal", porNino:"Due to El Niño",
+  obj:"Yachachiq helps you plan your farm with 45 years of NASA data.", pasos:["Today","Next month","My crops"],
+  hoySub:"What happened in the last 30 days", irMes:m=>`Step 2: what is coming in ${m}?`, irCult:"Step 3: what do I do with my crops?",
+  prono:m=>`Forecast for ${m}`, pronoSub:"This is what is coming next month. It is not today's weather.", prepM:m=>`Get ready for ${m}`,
+  llNormMes:m=>`Normal rain in ${m}`, llNormV:(m,x)=>x < 3 ? `It hardly rains in ${m}` : `It usually rains about ${x} mm in ${m}`, verTit:v=>`Summer ${v} (December to March)`,
   hacer:"What to do these days", cuando:"When does it rain in your area?", cuandoNota:"Bars: normal rain each month. In yellow, next month.",
   cultivo:"Coming soon: choose your crop and we will tell you how the weather affects it.", mesNota:"Typical error: ±0.5 °C.",
   qEs:"What is Yachachiq?", qEsT:"A <b>free</b> app that tells you how rain and heat are in your area, and what to expect. It uses 45 years of NASA data from satellites and climate models. The name is Quechua: a <b>yachachiq</b> is “the one who knows and teaches what they know”.",
@@ -1658,8 +1703,8 @@ const CULT_ZONA = {"Costa (Ilo)":["olivo","alfalfa"], "Desierto intermedio (Moqu
   "Valle de Omate":["palta","vid","alfalfa"], "Sierra media (Carumas-Torata)":["alfalfa","papa","oregano"],
   "Zona alta norte (Ichuña)":["papa","pasto"], "Altiplano (represa Pasto Grande)":["papa","pasto"]};
 const CULT = {
- es:{titulo:"Sus cultivos y el clima de este año", aviso:"Información orientativa. Consulte a un agrónomo o a su agencia agraria.",
-  necesita:"Lo que necesita", esteAnio:"Este año", pronto:"Pronto: calendario de siembra y cosecha.",
+ es:{titulo:"Consejos para sus cultivos", aviso:"Información orientativa. Consulte a un agrónomo o a su agencia agraria.",
+  necesita:"Lo que necesita", esteAnio:"Ahora", pronto:"Pronto: calendario de siembra y cosecha.",
   c:{olivo:{n:"Olivo", nec:"Necesita un invierno fresco para florecer bien.", calor:"Ojo con El Niño: en 2024 un invierno caliente hizo caer mucho la cosecha de aceituna en el sur. No deje que le falte agua cuando florezca: es cuando más la necesita.", normal:"Clima normal para el olivo."},
     alfalfa:{n:"Alfalfa", nec:"Necesita bastante agua para dar buenos cortes.", calor:"Con mucho calor la alfalfa rinde menos por corte. Regar de más no lo arregla: riegue lo normal, en horas frescas y sin encharcar.", normal:"Clima normal para la alfalfa."},
     palta:{n:"Palta", nec:"Necesita riego constante y es sensible a las heladas.", calor:"El calor fuerte en la floración puede hacer caer flores y frutitos: riegue bien antes de los días de calor.", normal:"Clima normal para la palta."},
@@ -1667,8 +1712,8 @@ const CULT = {
     papa:{n:"Papa", nec:"Las heladas fuertes (más de 2 grados bajo cero) dañan sus hojas. La falta de agua cuando forma las papas baja la cosecha.", calor:"Si falta lluvia, riegue cuando se estén formando las papas.", lluvia:"Llueve bien: buen momento para sembrar. Esté atento a las heladas.", helada:"Hubo heladas: si ya sembró, riegue antes y tape las plantitas en la noche.", normal:"Clima normal para la papa."},
     oregano:{n:"Orégano", nec:"Usa menos agua que la alfalfa o el maíz, pero sin agua su producción baja mucho.", calor:"Con calor y poca lluvia, riegue a tiempo para que no baje la cosecha.", normal:"Clima normal para el orégano."},
     pasto:{n:"Pastos y bofedales", nec:"Dependen de la lluvia del verano. Alimentan a alpacas y llamas.", calor:"Si llueve poco, no cargue el pasto con demasiados animales.", lluvia:"Llueve bien: cuide los bofedales y no los sobrecargue.", helada:"Con heladas crece poco pasto: guarde heno en un lugar seco y techado para alimentar a sus animales.", normal:"Clima normal para los pastos."}}},
- en:{titulo:"Your crops and this year's weather", aviso:"Guidance only. Check with an agronomist or your local agriculture office.",
-  necesita:"What it needs", esteAnio:"This year", pronto:"Coming soon: sowing and harvest calendar.",
+ en:{titulo:"Advice for your crops", aviso:"Guidance only. Check with an agronomist or your local agriculture office.",
+  necesita:"What it needs", esteAnio:"Now", pronto:"Coming soon: sowing and harvest calendar.",
   c:{olivo:{n:"Olive", nec:"Needs a cool winter to flower well.", calor:"Watch out for El Niño: in 2024 a warm winter caused a large drop in the olive harvest in southern Peru. Do not let it lack water at flowering: that is when it needs it most.", normal:"Normal weather for olives."},
     alfalfa:{n:"Alfalfa", nec:"Needs plenty of water for good cuts.", calor:"In strong heat alfalfa yields less per cut. Extra water does not fix it: irrigate as usual, in cool hours, without waterlogging.", normal:"Normal weather for alfalfa."},
     palta:{n:"Avocado", nec:"Needs steady irrigation and is sensitive to frost.", calor:"Strong heat at flowering can make flowers and small fruit drop: water well before hot days.", normal:"Normal weather for avocado."},
@@ -1765,60 +1810,75 @@ function pintar() {
   if (!document.getElementById("abuelo").classList.contains("habla")) animar(false);
   voz.desde = {d:subio >= .5 ? t.dD.mas : t.dD.igual, b:subio >= .5 ? t.bD.mas : t.bD.igual};
 
-  // INICIO
+  // Recorrido de la app: 1) Hoy → 2) Próximo mes → 3) Mis cultivos
+  const mesN = t.meses[pm.mes - 1];
+  const pasosHTML = n => `<div class="obj">${t.obj}</div><nav class="pasos">${t.pasos.map((x, i) =>
+    `<button class="${i + 1 === n ? "on" : ""}" onclick="irA('${["inicio", "chacra", "cultivos"][i]}')"><b>${i + 1}</b>${x}</button>`).join('<span class="fl">›</span>')}</nav>`;
+  const irBtn = (dest, txt) => `<button class="irSig" onclick="irA('${dest}')">${txt} <span>›</span></button>`;
+
+  // 1) HOY: lo que pasó en los últimos 30 días + la tendencia desde 1981
   DATOS_DIA = datosDelDia(Z, t);
-  document.getElementById("inicio").innerHTML = `
+  document.getElementById("inicio").innerHTML = `${pasosHTML(1)}
     <h2 class="hHoy">${t.hoy} <span id="fechaVivo">${fechaVivoHTML(z)}</span></h2>
+    <div class="subH">${t.hoySub}</div>
     <div class="dos"><div class="tiles">
       ${semaforo("s1", t.lluvia, mL)}
       ${mH ? semaforo("s2", t.hel, mH, t.hNota(Z.heladas.normal_mediana)) : semaforo("s2", t.temp, mT)}
-      ${semaforo("s3", t.verano(v.verano), mV, t.recuerdo(yRec))}
-      <button class="sem" data-voz="desde"><div class="luz" style="border-color:${subio >= .5 ? HEX.rojo : HEX.verde}">${ico("arena", 40)}</div>
+      <button class="sem ancho" data-voz="desde"><div class="luz" style="border-color:${subio >= .5 ? HEX.rojo : HEX.verde}">${ico("arena", 40)}</div>
         <div><div class="t">${t.antes}</div><div class="v">${subio >= .5 ? t.masCalor80 : t.igual80}</div><div class="nota">${sg(subio)} °C (1981-2025)</div></div><span class="vz">${ico("parlante", 34)}</span></button>
     </div><div><div id="mapa" aria-label="${t.mapa}"></div></div></div>
     ${avIdi ? `<div class="soloMovil">${avIdi}</div>` : ""}
+    ${irBtn("chacra", t.irMes(mesN))}
     <div class="saber dato" id="datoDia">${datoHTML()}</div>
-    <button class="btnSaberes enInicio" onclick="contarSaber()"><span class="icSab"></span><span class="txSab"></span></button>
     <a class="senamhi" href="https://www.senamhi.gob.pe/?p=pronostico-meteorologico" target="_blank" rel="noopener">${ico("nube", 44)}
       <span><b>${ln() === "en" ? "Will it rain tomorrow?" : xq("llueve", "¿Llueve mañana?")}</b><br>${ln() === "en" ? "See the daily forecast from SENAMHI, Peru's weather service" : xq("llueveSub", "Vea el pronóstico de cada día del SENAMHI")}</span><span class="flecha">›</span></a>`;
 
   cargarVivo(z);
   setTimeout(precargar, 300);
-  document.querySelectorAll(".icSab").forEach(e => e.innerHTML = ico("foco", 30));
-  document.querySelectorAll(".txSab").forEach(e => e.textContent = ln() === "en" ? "Andean knowledge" : xq("saber", "Saberes ancestrales"));
-  // MI CHACRA
+
+  // 2) PRÓXIMO MES: pronóstico y qué preparar (no es el clima de hoy)
+  const llMes = Z.lluvia_normal.map(m => m[2]), mxMes = Math.max(...llMes, 1), llSig = llMes[pm.mes - 1];
+  const mesLluvioso = llSig >= 3 && llSig / mxMes >= .5;
   const claves = [];
-  const hayHelada = !!mH;  // zona de heladas: no se usan consejos de calor (dato de temperatura provisional)
+  const hayHelada = !!mH;   // zona de heladas: no se usan consejos de calor
+  const dif = pm.temp_esperada - pm.normal;
   if (mH && Z.heladas.noches_helada > 0) claves.push("heladas", "pielFrio");
-  if (mL.s === t.lMucha) claves.push("acequias"); else if (mL.s === t.lPoca) claves.push("guardar");
-  if (mV.c !== "verde") claves.push("guardar");
-  if ((mT.c === "rojo" || mT.c === "amarillo") && !hayHelada) claves.push("riegue", "piel");
+  if (dif > .5 && !hayHelada) claves.push("riegue", "piel");
+  if (mesLluvioso || mL.s === t.lMucha) claves.push("acequias");
+  if (mV.c === "amarillo" || mL.s === t.lPoca) claves.push("guardar");
   if (!claves.length) claves.push("normal");
   const keys = [...new Set(claves)].slice(0, 4), G = GUIAS[ln()];
   const tareas = keys.map(k => G[k].t);
-  const dif = pm.temp_esperada - pm.normal;
-  voz.mes = ln() === "en" ? {d:`In ${t.meses[pm.mes - 1]} it will be about ${fmt(pm.temp_esperada, 0)} degrees, ${dif > .5 ? "warmer than normal" : "as usual"}.`, b:`${fmt(pm.temp_esperada, 0)} °C`}
-                          : {d:`En ${t.meses[pm.mes - 1]} hará unos ${fmt(pm.temp_esperada, 0)} grados, ${dif > .5 ? "más calor de lo normal" : "como siempre"}.`, b:`${fmt(pm.temp_esperada, 0)} °C`};
+  voz.mes = ln() === "en" ? {d:`In ${mesN} it will be about ${fmt(pm.temp_esperada, 0)} degrees, ${dif > .5 ? "warmer than normal" : "as usual"}.`, b:`${fmt(pm.temp_esperada, 0)} °C`}
+                          : {d:`En ${mesN} hará unos ${fmt(pm.temp_esperada, 0)} grados, ${dif > .5 ? "más calor de lo normal" : "como siempre"}.`, b:`${fmt(pm.temp_esperada, 0)} °C`};
+  voz.llmes = {d:t.llNormV(mesN, Math.round(llSig)) + ".", b:t.llNormMes(mesN)};
   voz.tareas = {d:tareas.join(". ") + ".", b:tareas[0]};
-  const maxN = Math.max(...Z.lluvia_normal.map(m => m[2]), 1);
-  document.getElementById("chacra").innerHTML = `<div class="col2"><div>
-    <h2>${t.hacer}</h2>
-    <div class="tareas">${keys.map(k => `<button class="tarea2" onclick="abrirGuia('${k}')"><span class="ic">${ico(G[k].ic, 52)}</span>
-      <span class="tt">${xq("guiaT", {})[k] || G[k].t}</span><span class="como">${xq("como", G.como)} ${ico("play", 24)}</span></button>`).join("")}</div>
-    </div><div>
-    <h2>${t.proxMes}: ${t.meses[pm.mes - 1]}</h2>
-    <div class="grande" data-voz="mes">
+  document.getElementById("chacra").innerHTML = `${pasosHTML(2)}
+    <div class="pronoBan">${ico("calendario", 54)}<div><div class="pt">${t.prono(mesN)}</div><div class="ps">${t.pronoSub}</div></div></div>
+    <div class="col2"><div>
+    <div class="grande" data-voz="mes"><span class="etq">${t.proxMes}</span>
       <div class="sub">${t.hara}</div>
       <div class="num">${ico("termometro", 52)} ${fmt(pm.temp_esperada)} °C</div>
       <div class="sub">${t.entre(fmt(pm.temp_min), fmt(pm.temp_max))}</div>
       <div class="chips"><div>${t.lonormal}<b>${fmt(pm.normal)} °C</b></div><div>${t.porNino}<b>${sg(pm.temp_esperada - pm.normal)} °C</b></div></div>
       <div class="nota">${t.mesNota}</div>
     </div>
+    <button class="sem" data-voz="llmes"><div class="luz" style="border-color:${HEX.azul}">${ico("gota", 40)}</div>
+      <div><div class="t">${t.llNormMes(mesN)}</div><div class="v">${t.llNormV(mesN, Math.round(llSig))}</div></div><span class="vz">${ico("parlante", 34)}</span></button>
+    ${semaforo("s3", t.verTit(v.verano), mV, t.recuerdo(yRec))}
+    </div><div>
+    <h2>${t.prepM(mesN)}</h2>
+    <div class="tareas">${keys.map(k => `<button class="tarea2" onclick="abrirGuia('${k}')"><span class="ic">${ico(G[k].ic, 52)}</span>
+      <span class="tt">${xq("guiaT", {})[k] || G[k].t}</span><span class="como">${xq("como", G.como)} ${ico("play", 24)}</span></button>`).join("")}</div>
     <h2>${t.cuando}</h2>
     ${calendarioLluvia(Z, pm.mes, t)}
+    <button class="btnSaberes enInicio" onclick="contarSaber()"><span class="icSab"></span><span class="txSab"></span></button>
     </div></div>
+    ${irBtn("cultivos", t.irCult)}
 `;
-  document.getElementById("cultivos").innerHTML = cultivosHTML(z, mL, mT, mV, mH);
+  document.querySelectorAll(".icSab").forEach(e => e.innerHTML = ico("foco", 30));
+  document.querySelectorAll(".txSab").forEach(e => e.textContent = ln() === "en" ? "Andean knowledge" : xq("saber", "Saberes ancestrales"));
+  document.getElementById("cultivos").innerHTML = pasosHTML(3) + cultivosHTML(z, mL, mT, mV, mH);
 
   // INFORMACIÓN
   document.getElementById("info").innerHTML = `<div class="info2">
